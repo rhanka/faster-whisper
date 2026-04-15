@@ -42,18 +42,16 @@ async function decodeAudioNode(
     inputFile: string | Buffer | Uint8Array,
     samplingRate: number
 ): Promise<Float32Array> {
-    // Dynamic imports for Node-specific modules to avoid bundling issues in browsers
     const cp = await import('child_process');
     const spawn: any = cp.spawn;
-    const ffmpegStaticModule: any = await import('ffmpeg-static');
-    const ffmpegStatic: string = ffmpegStaticModule.default || ffmpegStaticModule;
-    
-    if (!ffmpegStatic) {
-        throw new Error("ffmpeg-static is not found");
-    }
+    const ffmpegPath = process.env.FASTER_WHISPER_FFMPEG_PATH || 'ffmpeg';
 
     return new Promise((resolve, reject) => {
         const args = [
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-nostdin',
             '-i', typeof inputFile === 'string' ? inputFile : 'pipe:0',
             '-f', 's16le',
             '-ac', '1',
@@ -61,9 +59,12 @@ async function decodeAudioNode(
             'pipe:1'
         ];
 
-        const child = spawn(ffmpegStatic, args);
+        const child = spawn(ffmpegPath, args, {
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
 
         const chunks: Buffer[] = [];
+        const stderrChunks: Buffer[] = [];
         let totalLength = 0;
 
         if (child.stdout) {
@@ -75,14 +76,18 @@ async function decodeAudioNode(
 
         if (child.stderr) {
             child.stderr.on('data', (data: Buffer) => {
-                // Uncomment for debugging FFmpeg in Node.js
-                // console.error(`FFmpeg stderr: ${data}`);
+                stderrChunks.push(data);
             });
         }
 
         child.on('close', (code: number | null) => {
             if (code !== 0) {
-                return reject(new Error(`FFmpeg process exited with code ${code}`));
+                const details = Buffer.concat(stderrChunks).toString('utf8').trim();
+                return reject(new Error(
+                    details
+                        ? `ffmpeg decoder failed (${code}) using "${ffmpegPath}": ${details}`
+                        : `ffmpeg decoder failed with exit code ${code} using "${ffmpegPath}".`
+                ));
             }
 
             const rawData = Buffer.concat(chunks, totalLength);
@@ -98,7 +103,7 @@ async function decodeAudioNode(
         });
 
         child.on('error', (err: Error) => {
-            reject(err);
+            reject(new Error(`Failed to start ffmpeg decoder with "${ffmpegPath}": ${err.message}`));
         });
 
         if (typeof inputFile !== 'string' && child.stdin) {

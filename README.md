@@ -27,14 +27,15 @@ Thanks to the original `faster-whisper` project for the implementation direction
 - `npm`
 - `cmake`
 - a C++17 compiler toolchain
+- `ffmpeg` available on `PATH` for Node.js audio decoding, or `FASTER_WHISPER_FFMPEG_PATH` set explicitly
 
 The package builds `whisper_bridge` locally during install. The repository vendors the CTranslate2 headers and shared libraries needed by the current Linux CPU path.
 
-A fresh `npm install` still needs network access for upstream dependency installers such as `onnxruntime-node` and `ffmpeg-static`.
+A fresh `npm install` still needs network access for `onnxruntime-node`. The Node.js decoder no longer depends on `ffmpeg-static`; it uses the system `ffmpeg` binary instead.
 
 ## Runtime Support
 
-- Supported release target: Node.js 20+ on the current Linux CPU path
+- Supported release target: Node.js 20+ on the current Linux CPU path with system `ffmpeg`
 - Kept in code but not yet declared as a stable package target: the browser-oriented FFmpeg WASM fallback in `audio.ts`
 - Not yet packaged as a stable release target: GPU runtime variants and prebuilt native binaries
 - First npm release decision: install from source at `postinstall`; prebuilt binaries are explicitly deferred
@@ -121,6 +122,12 @@ Silero VAD is packaged at `assets/silero_vad_v6.onnx` and resolved relative to t
 const [segments] = await model.transcribe("audio.mp3", {
   vadFilter: true,
 });
+```
+
+If `ffmpeg` is not on `PATH`, set:
+
+```bash
+FASTER_WHISPER_FFMPEG_PATH=/absolute/path/to/ffmpeg
 ```
 
 ## Tests

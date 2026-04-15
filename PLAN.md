@@ -18,7 +18,7 @@
 - [x] Local migration leftovers are removed from disk
   - Current result: `ts/`, `faster_whisper/`, `benchmark/`, and `docker/` were removed locally after the root cut-over
   - Current result: `graphify-out/` is intentionally kept as a local ignored output directory
-  - Current result: a fresh clone check in `/tmp/faster-whisper-release-check` reached external installer blockers in `onnxruntime-node` / `ffmpeg-static`
+  - Current result: a fresh clone check in `/tmp/faster-whisper-release-check` reached an external installer blocker in `onnxruntime-node`
 
 ## Guardrails
 
@@ -77,6 +77,8 @@ Pending commit chunks:
 - [x] `chore: remove remaining migration leftovers` (`29c6562`)
 - [x] `feat: stabilize transcription timestamp handling` (`54c1c72`)
 - [x] `docs: add npm release and publishing guide` (`4c60b9c`)
+- [x] `docs: expand README parity coverage` (`639b361`)
+- [x] `docs: note fresh install network requirements` (`7757fdd`)
 
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
@@ -117,13 +119,13 @@ Status: implemented with hybrid runtime strategy
 
 Completed:
 - [x] Port `decode_audio` and `pad_or_trim`
-- [x] Implement the Node.js fast path with `ffmpeg-static`
+- [x] Implement the Node.js fast path with `ffmpeg`
 - [x] Keep a browser-oriented fallback path with `@ffmpeg/ffmpeg`
 - [x] Match the `jfk.flac` smoke-test output used during the migration
 
 Carry-over hardening:
 - [x] Decide the supported runtime matrix for the npm package
-  - [x] Node.js native path (`ffmpeg-static`) is the supported release target
+  - [x] Node.js native path (system `ffmpeg`) is the supported release target
   - [x] browser/WASM fallback is kept in code but not declared stable
 - [x] Document the supported runtime matrix clearly in the future README
 - [x] Turn the current audio smoke script into an automated test under the root package
@@ -212,7 +214,7 @@ Plan:
   - [x] keep `graphify-out/` ignored as local output
   - [x] ensure `git status --short` is clean after the move and commits
   - [ ] ensure the root repo can be cloned and built with npm only
-    - Current blocker: fresh `npm ci` from a clean clone still depends on upstream network downloads in `onnxruntime-node` and `ffmpeg-static`
+    - Current blocker: fresh `npm ci` from a clean clone still depends on upstream network downloads in `onnxruntime-node`
 
 ## Lot 7 - README, Docs, License, And Attribution Cut-over
 
