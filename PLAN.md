@@ -13,10 +13,11 @@
 - [x] Verify whether everything has been committed
 - [x] Working tree is fully committed
   - Current result: `git status --short --branch` is clean after the cut-over commits
-  - Current result: local ignored leftovers still exist on disk and are tracked separately below
+  - Current result: later cleanup may create a final small commit for tracked leftovers
 - [x] `.codex` is ignored
-- [ ] Local migration leftovers are removed from disk
-  - Current result: `ts/`, `graphify-out/`, `benchmark/benchmark.m4a`, `docker/jfk.flac`, and empty legacy directories still exist locally
+- [x] Local migration leftovers are removed from disk
+  - Current result: `ts/`, `faster_whisper/`, `benchmark/`, and `docker/` were removed locally after the root cut-over
+  - Current result: `graphify-out/` is intentionally kept as a local ignored output directory
 
 ## Guardrails
 
@@ -32,11 +33,11 @@
 
 ## Remaining Order
 
-1. [ ] Remove local leftovers that still make the repo look hybrid
+1. [x] Remove local leftovers that still make the repo look hybrid
    - [x] ignore `graphify-out/`
-   - [ ] remove the physical `graphify-out/` directory
-   - [ ] remove the physical `ts/` directory now that root files are in place
-   - [ ] remove the leftover legacy directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
+   - [x] keep the physical `graphify-out/` directory ignored as local output
+   - [x] remove the physical `ts/` directory now that root files are in place
+   - [x] remove the leftover legacy directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
 2. [ ] Finish the release-surface decisions for the npm-only repo
    - [x] remove the Python-only `benchmark/` surface from the npm-only repository
    - [x] remove the Python-only `docker/` surface from the npm-only repository
@@ -179,7 +180,7 @@ Plan:
   - [x] move `ts/whisper_bridge` to a root native directory
   - [x] move `ts/tsconfig.json` to root `tsconfig.json`
   - [x] move or recreate root `tests` for the TypeScript package
-  - [ ] stop using `ts/` as a nested package boundary
+  - [x] stop using `ts/` as a nested package boundary
 - [x] Normalize the root build pipeline
   - [x] add root `build`, `dev`, `lint`, `test`, and `prepublishOnly` scripts
   - [x] integrate the native bridge build from the root package
@@ -196,14 +197,14 @@ Plan:
   - [x] delete the tracked Python source files under `faster_whisper/`
   - [x] delete Python packaging files: `setup.py`, `setup.cfg`, `MANIFEST.in`, `requirements.txt`, `requirements.conversion.txt`
   - [x] delete or replace Python-specific tests under `tests/`
-  - [ ] remove the leftover local directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
+  - [x] remove the leftover local directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
   - [x] decide the fate of `benchmark/`:
     - [x] remove it from the npm-only repository
   - [x] decide the fate of `docker/`:
     - [x] remove it from the npm-only repository
 - [ ] Make the root repository clean and releasable
-  - [ ] remove the physical `ts/` directory from disk
-  - [ ] remove the accidental `graphify-out/` directory from disk
+  - [x] remove the physical `ts/` directory from disk
+  - [x] keep `graphify-out/` ignored as local output
   - [ ] ensure `git status --short` is clean after the move and commits
   - [ ] ensure the root repo can be cloned and built with npm only
 
@@ -249,12 +250,12 @@ Plan:
 ## Exit Criteria
 
 - [x] The current TypeScript migration work is committed
-- [ ] The repository root is npm-only and historical leftovers are removed
-- [ ] The nested `ts/` package no longer exists on disk
+- [x] The repository root is npm-only and historical leftovers are removed
+- [x] The nested `ts/` package no longer exists on disk
 - [x] Python package and Python packaging files are removed from the repository
 - [x] Root `npm install`, `npm run build`, `npm test`, and `npm pack` succeed
 - [x] Runtime code no longer depends on repo-local absolute paths
 - [x] The root `README.md` documents the npm package, not the old Python package
 - [x] The project remains under a permissive free license
 - [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
-- [x] `git status --short` is clean at the end of the cut-over
+- [ ] `git status --short` is clean at the end of the cut-over
