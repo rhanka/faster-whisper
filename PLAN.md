@@ -14,10 +14,10 @@
   - [x] `node dist/test_vad.js`
   - [x] `node dist/test_transcribe.js`
 - [x] Verify whether everything has been committed
-- [ ] Working tree is fully committed
-  - Current result: `git status --short --branch` is **not clean**
-  - Current result: untracked entries are `?? .codex` and `?? ts/`
-  - Current result: the TypeScript migration work is **not committed yet** in this repository
+- [x] Working tree is fully committed
+  - Current result: `git status --short --branch` is clean, with `master...origin/master [ahead 5]`
+  - Current result: `.codex` is ignored
+  - Current result: the TypeScript migration work is now committed in logical chunks
 
 ## Guardrails
 
@@ -27,7 +27,7 @@
 - [x] Plan to preserve and acknowledge the original `SYSTRAN/faster-whisper` work explicitly
 - [x] Treat phases 1 to 5 as already implemented at smoke-test level, not yet fully industrialized
 - [x] Do not claim full parity in documentation until the automated parity matrix exists
-- [ ] Create a first explicit checkpoint commit for the current TypeScript migration before destructive moves
+- [x] Create a first explicit checkpoint commit for the current TypeScript migration before destructive moves
 - [ ] Do not delete Python files until the root-level npm package builds and tests successfully from repo root
 - [ ] Eliminate all hard-coded absolute local paths before calling the package releasable
 
@@ -38,8 +38,15 @@ Plan:
 - [x] Confirm whether the migration work is already committed
 - [x] Confirm the `../graphify` reference model for package structure
 - [ ] Create a dedicated migration branch for the cut-over if needed
-- [ ] Commit the current `ts/` migration tree as a safety checkpoint before the root move
-- [ ] Decide whether `.codex` should be ignored or removed so the worktree can become clean
+- [x] Commit the current `ts/` migration tree as a safety checkpoint before the root move
+- [x] Decide whether `.codex` should be ignored or removed so the worktree can become clean
+
+Checkpoint commits created:
+- [x] `a0515f1` `chore: add cut-over plan and ignore local artifacts`
+- [x] `1dc8ea6` `feat(ts): add native bridge and FFI core`
+- [x] `bb7ef28` `feat(ts): add audio decoding pipeline`
+- [x] `ef8f9b2` `feat(ts): add tokenizer vad and feature extraction`
+- [x] `4fbd470` `feat(ts): add end-to-end transcription pipeline`
 
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
@@ -208,7 +215,7 @@ Plan:
 
 ## Exit Criteria
 
-- [ ] The current TypeScript migration work is committed
+- [x] The current TypeScript migration work is committed
 - [ ] The repository root is npm-only
 - [ ] The nested `ts/` package no longer exists
 - [ ] Python package and Python packaging files are removed from the repository
