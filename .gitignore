@@ -13,3 +13,14 @@ venv/
 # Ignore IDE, Editor Files
 .idea/
 .vscode/
+.codex
+
+# TypeScript migration artifacts
+ts/node_modules/
+ts/dist/
+ts/ctranslate2_src/
+ts/whisper_bridge/build/
+ts/src/*.js
+ts/src/*.js.map
+ts/src/*.d.ts
+ts/src/*.d.ts.map
