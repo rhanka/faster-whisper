@@ -48,7 +48,7 @@
    - [ ] broaden model coverage beyond the single tiny-model smoke path
 4. [ ] Finish documentation parity for the npm-only port
    - [ ] expand the README section coverage
-   - [ ] add release and publishing notes
+   - [x] add release and publishing notes
 5. [ ] Commit the cut-over in ordered chunks and end on a clean `git status`
 
 ## Lot 0 - Commit Hygiene And Baseline
@@ -246,8 +246,8 @@ Plan:
   - [x] thank the original maintainers for the implementation and direction
 - [x] Update supporting docs after the README rewrite
   - [x] `CONTRIBUTING.md`
-  - [ ] release/build instructions
-  - [ ] package publishing notes
+  - [x] release/build instructions
+  - [x] package publishing notes
 
 ## Exit Criteria
 

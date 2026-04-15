@@ -150,6 +150,8 @@ npm run pack:check
 
 `npm run pack:check` verifies the publishable tarball from the repo root. The published package is intended to contain only the compiled JS, assets, build scripts, vendored native inputs, and license/readme files required at install time.
 
+Release and publish steps are documented in [RELEASING.md](RELEASING.md).
+
 ## Notes On Parity
 
 This repository is not claiming complete feature parity with upstream `faster-whisper` yet. The current port is centered on the existing TypeScript implementation that already validates the main inference path. Items still intentionally deferred or not yet fully documented include:

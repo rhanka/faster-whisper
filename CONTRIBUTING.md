@@ -36,3 +36,5 @@ Contributions should preserve the npm-only repository layout:
 - root `tests/`
 - root `whisper_bridge/`
 - no new Python packaging surface
+
+For release and npm publishing steps, use [RELEASING.md](RELEASING.md).
