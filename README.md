@@ -19,7 +19,6 @@ Thanks to the original `faster-whisper` project for the implementation direction
 - Deferred transcription options now fail fast with explicit errors instead of being silently ignored.
 - Some parity work is still pending before claiming full upstream coverage:
   - full benchmark matrix
-  - documentation parity across every upstream section
   - broader model/runtime validation
 
 ## Requirements
@@ -36,6 +35,7 @@ The package builds `whisper_bridge` locally during install. The repository vendo
 - Supported release target: Node.js 20+ on the current Linux CPU path
 - Kept in code but not yet declared as a stable package target: the browser-oriented FFmpeg WASM fallback in `audio.ts`
 - Not yet packaged as a stable release target: GPU runtime variants and prebuilt native binaries
+- First npm release decision: install from source at `postinstall`; prebuilt binaries are explicitly deferred
 
 ## Installation
 
@@ -107,6 +107,10 @@ Currently deferred until the TypeScript port is stabilized further:
 
 When one of these deferred options is passed today, the TypeScript port throws an explicit error instead of silently accepting unsupported behavior.
 
+## Word Timestamps
+
+Word-level timestamp extraction is not yet part of the stable npm surface. Passing `wordTimestamps: true` currently throws an explicit error until the TypeScript port has parity-grade timestamp alignment and validation.
+
 ## VAD
 
 Silero VAD is packaged at `assets/silero_vad_v6.onnx` and resolved relative to the installed package layout. Enable it during transcription with:
@@ -137,6 +141,20 @@ If you already have a converted CTranslate2 model elsewhere, point tests to it:
 FASTER_WHISPER_TEST_MODEL=/absolute/path/to/model npm test
 ```
 
+## Benchmark And Performance
+
+The npm-only port does not currently ship the old Python benchmark harness. Performance claims from the original repository are therefore not restated here until the Node.js port has its own reproducible benchmark matrix.
+
+The current priority is correctness of the root package, deterministic native builds, and a documented install path for the Linux CPU target.
+
+## Logging
+
+The current package does not yet expose a structured logging API equivalent to the original Python surface. In practice:
+
+- native bridge and CTranslate2 messages may still appear on stderr/stdout,
+- smoke tests rely on process output today,
+- package-level logging controls remain to be designed if a stable public logger is introduced later.
+
 ## Packaging
 
 Useful root-level commands:
@@ -152,14 +170,38 @@ npm run pack:check
 
 Release and publish steps are documented in [RELEASING.md](RELEASING.md).
 
+## Going Further
+
+- Use a local converted CTranslate2 Whisper model directory and pass its absolute path to `new WhisperModel(...)`.
+- Integrate the package from Node.js first; the browser-oriented fallback path is intentionally not documented as stable yet.
+- Keep release expectations scoped to the current Linux CPU path until GPU and prebuilt distribution are validated separately.
+
+## Model Conversion
+
+Model conversion tooling is intentionally not bundled in this npm-only repository. For now, prepare converted Whisper models outside this package using the original `faster-whisper` / CTranslate2 workflow, then point the Node.js API at the resulting model directory.
+
+The expected runtime inputs remain the converted model weights plus tokenizer/config files such as `tokenizer.json`.
+
+## Performance Comparison Notes
+
+This repository does not currently claim benchmark parity with upstream `faster-whisper`. The first npm release is positioned as a TypeScript/Node packaging and runtime port, not as a reproduced performance study.
+
+## Removed From The npm Port
+
+The following repository surfaces from the original Python-first layout were intentionally removed from this npm-only port:
+
+- Python packaging and import surface
+- Python-oriented benchmark harness
+- Docker assets tied to the previous Python workflow
+
+These removals are intentional and part of the root-level npm cut-over, not accidental omissions.
+
 ## Notes On Parity
 
 This repository is not claiming complete feature parity with upstream `faster-whisper` yet. The current port is centered on the existing TypeScript implementation that already validates the main inference path. Items still intentionally deferred or not yet fully documented include:
 
-- benchmark reproduction in Node
-- Python-specific workflows from the original repository
-- model conversion tooling
-- full documentation for every upstream transcription option
+- benchmark reproduction in Node beyond the current smoke coverage
+- broader model/runtime validation beyond the tiny-model Linux CPU path
 - stable word-timestamp parity
 
 ## License

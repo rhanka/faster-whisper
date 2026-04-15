@@ -38,16 +38,16 @@
    - [x] keep the physical `graphify-out/` directory ignored as local output
    - [x] remove the physical `ts/` directory now that root files are in place
    - [x] remove the leftover legacy directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
-2. [ ] Finish the release-surface decisions for the npm-only repo
+2. [x] Finish the release-surface decisions for the npm-only repo
    - [x] remove the Python-only `benchmark/` surface from the npm-only repository
    - [x] remove the Python-only `docker/` surface from the npm-only repository
-   - [ ] decide whether prebuilt native binaries are deferred or planned
+   - [x] decide whether prebuilt native binaries are deferred or planned
 3. [ ] Stabilize the transcription layer beyond the current smoke proof
    - [x] review and replace the remaining simplified/POC logic in `src/transcribe.ts`
    - [x] align the code and tests with the newly documented supported/deferred option surface
    - [ ] broaden model coverage beyond the single tiny-model smoke path
-4. [ ] Finish documentation parity for the npm-only port
-   - [ ] expand the README section coverage
+4. [x] Finish documentation parity for the npm-only port
+   - [x] expand the README section coverage
    - [x] add release and publishing notes
 5. [ ] Commit the cut-over in ordered chunks and end on a clean `git status`
 
@@ -74,6 +74,8 @@ Pending commit chunks:
 - [x] `docs: rewrite npm-only docs and CI` (`c38ac2d`)
 - [x] `chore: refresh cut-over plan after root migration` (`5aea4a1`)
 - [x] `chore: remove remaining migration leftovers` (`29c6562`)
+- [x] `feat: stabilize transcription timestamp handling` (`54c1c72`)
+- [x] `docs: add npm release and publishing guide` (`4c60b9c`)
 
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
@@ -89,9 +91,9 @@ Completed:
 Carry-over hardening:
 - [x] Remove repo-local absolute library paths from the TypeScript loader
 - [x] Make the native library location deterministic from a root-level package install
-- [ ] Decide the long-term install strategy:
+- [x] Decide the long-term install strategy:
   - [x] build-from-source on `npm install`
-  - [ ] optional prebuilt binaries later
+  - [x] prebuilt binaries are explicitly deferred until after the first npm-only release
 
 ## Lot 2 - Phase 2 Recap: TypeScript Core And FFI
 
@@ -220,22 +222,22 @@ Plan:
   - [x] replace Python examples with TypeScript/JavaScript examples
   - [x] document the root-level npm install/build/test flow
   - [x] document the native bridge prerequisites honestly
-- [ ] Keep section-level parity with the current README where applicable
+- [x] Keep section-level parity with the current README where applicable
   - [x] intro and positioning
-  - [ ] benchmark/performance section
+  - [x] benchmark/performance section
   - [x] requirements
   - [x] installation
   - [x] usage
-  - [ ] word timestamps
+  - [x] word timestamps
   - [x] VAD filter
-  - [ ] logging
-  - [ ] going further / integrations
-  - [ ] model conversion notes
-  - [ ] performance comparison notes
-- [ ] For every current README section, choose one explicit outcome
+  - [x] logging
+  - [x] going further / integrations
+  - [x] model conversion notes
+  - [x] performance comparison notes
+- [x] For every current README section, choose one explicit outcome
   - [x] supported and documented in the npm package
   - [x] supported but deferred in docs until validated
-  - [ ] intentionally removed from the npm-only port with explanation
+  - [x] intentionally removed from the npm-only port with explanation
 - [x] Keep the project on the same free-license model
   - [x] stay on MIT unless a better-documented reason appears to change it
   - [ ] update the copyright/authorship lines appropriately for the port
