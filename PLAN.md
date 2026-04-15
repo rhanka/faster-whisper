@@ -38,8 +38,8 @@
    - [ ] remove the physical `ts/` directory now that root files are in place
    - [ ] remove the leftover legacy directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
 2. [ ] Finish the release-surface decisions for the npm-only repo
-   - [ ] decide the final fate of `benchmark/`
-   - [ ] decide the final fate of `docker/`
+   - [x] remove the Python-only `benchmark/` surface from the npm-only repository
+   - [x] remove the Python-only `docker/` surface from the npm-only repository
    - [ ] decide whether prebuilt native binaries are deferred or planned
 3. [ ] Stabilize the transcription layer beyond the current smoke proof
    - [ ] review and replace the remaining simplified/POC logic in `src/transcribe.ts`
@@ -68,8 +68,8 @@ Checkpoint commits created:
 - [x] `4fbd470` `feat(ts): add end-to-end transcription pipeline`
 
 Pending commit chunks:
-- [x] `feat: cut over to a root-level npm package`
-- [ ] `chore: remove Python-first repository surface`
+- [x] `feat: cut over to a root-level npm package` (`1be2964`)
+- [x] `chore: remove Python-first repository surface`
 - [ ] `docs: rewrite npm-only docs and CI`
 - [ ] `chore: refresh cut-over plan after root migration`
 
@@ -197,12 +197,10 @@ Plan:
   - [x] delete Python packaging files: `setup.py`, `setup.cfg`, `MANIFEST.in`, `requirements.txt`, `requirements.conversion.txt`
   - [x] delete or replace Python-specific tests under `tests/`
   - [ ] remove the leftover local directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
-  - [ ] decide the fate of `benchmark/`:
-    - [ ] port relevant benchmarks to Node.js
-    - [ ] or remove them from the npm-only repository
-  - [ ] decide the fate of `docker/`:
-    - [ ] port to a Node/npm image
-    - [ ] or remove it from the npm-only repository
+  - [x] decide the fate of `benchmark/`:
+    - [x] remove it from the npm-only repository
+  - [x] decide the fate of `docker/`:
+    - [x] remove it from the npm-only repository
 - [ ] Make the root repository clean and releasable
   - [ ] remove the physical `ts/` directory from disk
   - [ ] remove the accidental `graphify-out/` directory from disk
@@ -253,7 +251,7 @@ Plan:
 - [x] The current TypeScript migration work is committed
 - [ ] The repository root is npm-only and historical leftovers are removed
 - [ ] The nested `ts/` package no longer exists on disk
-- [ ] Python package and Python packaging files are removed from the repository
+- [x] Python package and Python packaging files are removed from the repository
 - [x] Root `npm install`, `npm run build`, `npm test`, and `npm pack` succeed
 - [x] Runtime code no longer depends on repo-local absolute paths
 - [x] The root `README.md` documents the npm package, not the old Python package
