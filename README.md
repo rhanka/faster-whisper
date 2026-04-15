@@ -30,6 +30,8 @@ Thanks to the original `faster-whisper` project for the implementation direction
 
 The package builds `whisper_bridge` locally during install. The repository vendors the CTranslate2 headers and shared libraries needed by the current Linux CPU path.
 
+A fresh `npm install` still needs network access for upstream dependency installers such as `onnxruntime-node` and `ffmpeg-static`.
+
 ## Runtime Support
 
 - Supported release target: Node.js 20+ on the current Linux CPU path

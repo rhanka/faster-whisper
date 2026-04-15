@@ -18,6 +18,7 @@
 - [x] Local migration leftovers are removed from disk
   - Current result: `ts/`, `faster_whisper/`, `benchmark/`, and `docker/` were removed locally after the root cut-over
   - Current result: `graphify-out/` is intentionally kept as a local ignored output directory
+  - Current result: a fresh clone check in `/tmp/faster-whisper-release-check` reached external installer blockers in `onnxruntime-node` / `ffmpeg-static`
 
 ## Guardrails
 
@@ -211,6 +212,7 @@ Plan:
   - [x] keep `graphify-out/` ignored as local output
   - [x] ensure `git status --short` is clean after the move and commits
   - [ ] ensure the root repo can be cloned and built with npm only
+    - Current blocker: fresh `npm ci` from a clean clone still depends on upstream network downloads in `onnxruntime-node` and `ffmpeg-static`
 
 ## Lot 7 - README, Docs, License, And Attribution Cut-over
 

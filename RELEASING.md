@@ -12,6 +12,8 @@ This repository is published as a root-level npm package.
 
 The current release target is the Linux CPU path that builds `whisper_bridge` from source during install.
 
+Fresh installs still require network access for upstream dependency installers, notably `onnxruntime-node` and `ffmpeg-static`.
+
 ## Release Checklist
 
 1. Work from a clean branch tip.
@@ -25,6 +27,8 @@ npm run lint
 npm test
 npm run pack:check
 ```
+
+If you want to simulate a clean machine, run the same sequence from a fresh clone with network access enabled for npm dependency install scripts.
 
 4. Inspect the tarball contents if needed:
 
