@@ -6,21 +6,22 @@ __pycache__/
 
 # Distribution / Packaging
 venv/
+node_modules/
+dist/
+*.tgz
 
 # Unit Test
 .pytest_cache/
+test-models/
+graphify-out/
 
 # Ignore IDE, Editor Files
 .idea/
 .vscode/
 .codex
 
-# TypeScript migration artifacts
-ts/node_modules/
-ts/dist/
-ts/ctranslate2_src/
-ts/whisper_bridge/build/
-ts/src/*.js
-ts/src/*.js.map
-ts/src/*.d.ts
-ts/src/*.d.ts.map
+# Native build artifacts
+whisper_bridge/build/
+
+# Temporary migration leftovers
+ts/

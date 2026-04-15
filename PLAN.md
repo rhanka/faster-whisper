@@ -4,20 +4,19 @@
 
 - [x] Confirm current upstream baseline branch: `master`
 - [x] Confirm current upstream baseline commit: `ed9a06c` (`origin/master`)
-- [x] Confirm current migration workspace: `ts/`
+- [x] Confirm the historical migration workspace: `ts/`
 - [x] Inspect `../graphify` as the reference model for a root-level npm-only package
-- [x] Verify current validation evidence for the TypeScript migration:
-  - [x] `bash -lc './node_modules/.bin/tsc -p tsconfig.json --noEmit'` from `ts/`
-  - [x] `node dist/test_audio.js`
-  - [x] `node dist/test_tokenizer.js`
-  - [x] `node dist/test_feature_extractor.js`
-  - [x] `node dist/test_vad.js`
-  - [x] `node dist/test_transcribe.js`
+- [x] Verify current validation evidence for the root-level npm package:
+  - [x] `npm run build`
+  - [x] `npm test`
+  - [x] `NPM_CONFIG_CACHE=/tmp/faster-whisper-npm-cache npm run pack:check`
 - [x] Verify whether everything has been committed
-- [x] Working tree is fully committed
-  - Current result: `git status --short --branch` is clean, with local commits ahead of `origin/master`
-  - Current result: `.codex` is ignored
-  - Current result: the TypeScript migration work is now committed in logical chunks
+- [ ] Working tree is fully committed
+  - Current result: the root cut-over changes are still uncommitted in the worktree
+  - Current result: creating the next commits is currently blocked by the sandbox reviewer limit, not by a repo issue
+- [x] `.codex` is ignored
+- [ ] Local migration leftovers are removed from disk
+  - Current result: `ts/`, `graphify-out/`, `benchmark/benchmark.m4a`, `docker/jfk.flac`, and empty legacy directories still exist locally
 
 ## Guardrails
 
@@ -28,8 +27,28 @@
 - [x] Treat phases 1 to 5 as already implemented at smoke-test level, not yet fully industrialized
 - [x] Do not claim full parity in documentation until the automated parity matrix exists
 - [x] Create a first explicit checkpoint commit for the current TypeScript migration before destructive moves
-- [ ] Do not delete Python files until the root-level npm package builds and tests successfully from repo root
-- [ ] Eliminate all hard-coded absolute local paths before calling the package releasable
+- [x] Do not delete Python files until the root-level npm package builds and tests successfully from repo root
+- [x] Eliminate all hard-coded absolute local paths before calling the package releasable
+
+## Remaining Order
+
+1. [ ] Remove local leftovers that still make the repo look hybrid
+   - [x] ignore `graphify-out/`
+   - [ ] remove the physical `graphify-out/` directory
+   - [ ] remove the physical `ts/` directory now that root files are in place
+   - [ ] remove the leftover legacy directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
+2. [ ] Finish the release-surface decisions for the npm-only repo
+   - [ ] decide the final fate of `benchmark/`
+   - [ ] decide the final fate of `docker/`
+   - [ ] decide whether prebuilt native binaries are deferred or planned
+3. [ ] Stabilize the transcription layer beyond the current smoke proof
+   - [ ] review and replace the remaining simplified/POC logic in `src/transcribe.ts`
+   - [ ] align the code and tests with the newly documented supported/deferred option surface
+   - [ ] broaden model coverage beyond the single tiny-model smoke path
+4. [ ] Finish documentation parity for the npm-only port
+   - [ ] expand the README section coverage
+   - [ ] add release and publishing notes
+5. [ ] Commit the cut-over in ordered chunks and end on a clean `git status`
 
 ## Lot 0 - Commit Hygiene And Baseline
 
@@ -48,6 +67,12 @@ Checkpoint commits created:
 - [x] `ef8f9b2` `feat(ts): add tokenizer vad and feature extraction`
 - [x] `4fbd470` `feat(ts): add end-to-end transcription pipeline`
 
+Pending commit chunks:
+- [x] `feat: cut over to a root-level npm package`
+- [ ] `chore: remove Python-first repository surface`
+- [ ] `docs: rewrite npm-only docs and CI`
+- [ ] `chore: refresh cut-over plan after root migration`
+
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
 Status: implemented and smoke-tested
@@ -60,10 +85,10 @@ Completed:
 - [x] Produce a working `libwhisper_bridge.so` in the current development layout
 
 Carry-over hardening:
-- [ ] Remove repo-local absolute library paths from the TypeScript loader
-- [ ] Make the native library location deterministic from a root-level package install
+- [x] Remove repo-local absolute library paths from the TypeScript loader
+- [x] Make the native library location deterministic from a root-level package install
 - [ ] Decide the long-term install strategy:
-  - [ ] build-from-source on `npm install`
+  - [x] build-from-source on `npm install`
   - [ ] optional prebuilt binaries later
 
 ## Lot 2 - Phase 2 Recap: TypeScript Core And FFI
@@ -77,9 +102,9 @@ Completed:
 - [x] Keep the bridge callable from the current `ts/src/whisper.ts`
 
 Carry-over hardening:
-- [ ] Add a root-level `src/index.ts` public entrypoint
-- [ ] Replace development-only test scripts with exported library APIs plus tests
-- [ ] Normalize package types, exports, and declarations from the future root package
+- [x] Add a root-level `src/index.ts` public entrypoint
+- [x] Replace development-only test scripts with exported library APIs plus tests
+- [x] Normalize package types, exports, and declarations from the future root package
 
 ## Lot 3 - Phase 3 Recap: Audio Pipeline (`audio.ts`)
 
@@ -92,11 +117,11 @@ Completed:
 - [x] Match the `jfk.flac` smoke-test output used during the migration
 
 Carry-over hardening:
-- [ ] Decide whether the npm package officially supports both:
-  - [ ] Node.js native path (`ffmpeg-static`)
-  - [ ] browser/WASM fallback
-- [ ] Document the supported runtime matrix clearly in the future README
-- [ ] Turn the current audio smoke script into an automated test under the root package
+- [x] Decide the supported runtime matrix for the npm package
+  - [x] Node.js native path (`ffmpeg-static`) is the supported release target
+  - [x] browser/WASM fallback is kept in code but not declared stable
+- [x] Document the supported runtime matrix clearly in the future README
+- [x] Turn the current audio smoke script into an automated test under the root package
 
 ## Lot 4 - Phase 4 Recap: Feature Extractor, VAD, Tokenizer
 
@@ -109,9 +134,9 @@ Completed:
 - [x] Validate the dedicated smoke scripts for tokenizer, feature extractor, and VAD
 
 Carry-over hardening:
-- [ ] Package the VAD asset cleanly instead of resolving it through repo-relative assumptions
-- [ ] Remove hard-coded model and fixture paths from the smoke scripts
-- [ ] Convert the smoke scripts into a durable automated parity suite
+- [x] Package the VAD asset cleanly instead of resolving it through repo-relative assumptions
+- [x] Remove hard-coded model and fixture paths from the smoke scripts
+- [x] Convert the smoke scripts into a durable automated parity suite
 - [ ] Verify broader model coverage beyond the single current migration path
 
 ## Lot 5 - Phase 5 Recap: End-to-End Transcription (`transcribe.ts`)
@@ -127,42 +152,51 @@ Completed:
 Carry-over hardening:
 - [ ] Replace the current proof-by-smoke-test with an explicit parity matrix
 - [ ] Review simplified or POC-marked sections before calling the package stable
-- [ ] Decide which features are fully supported at cut-over time versus explicitly deferred
+  - [ ] replace the stubbed VAD timestamp remapping in `src/transcribe.ts`
+  - [ ] replace the simplified timestamp split logic in `src/transcribe.ts`
+  - [ ] replace the simplified seek advancement logic in `src/transcribe.ts`
+- [x] Decide which features are fully supported at cut-over time versus explicitly deferred
+  - [x] `wordTimestamps` is explicitly deferred
+  - [x] `clipTimestamps` is explicitly deferred
+  - [x] `hallucinationSilenceThreshold` is explicitly deferred
+  - [x] `hotwords` is explicitly deferred
+  - [x] `languageDetectionThreshold` / `languageDetectionSegments` are explicitly deferred
 
 ## Lot 6 - Root-Level npm Package Finalization
 
 Goal: replace the Python-first repository layout with a **root-level npm-only package**, following the `../graphify` model (`package.json` at repo root, root `src/`, root `tests/`, root `dist/`, root-level build/test scripts, MIT license, clean package exports).
 
 Plan:
-- [ ] Create the root package manifest modeled after `../graphify`
-  - [ ] move from `ts/package.json` to a real root `package.json`
-  - [ ] set the final package name
-  - [ ] set `type`, `main`, `module`, `types`, and `exports`
-  - [ ] add `files` so npm publishes only the intended runtime artifacts
-  - [ ] add `engines.node`
-  - [ ] align `license`, `repository`, `homepage`, and `bugs`
-- [ ] Move the TypeScript project to repo root
-  - [ ] move `ts/src` to root `src`
-  - [ ] move `ts/whisper_bridge` to a root native directory
-  - [ ] move `ts/tsconfig.json` to root `tsconfig.json`
-  - [ ] move or recreate root `tests` for the TypeScript package
+- [x] Create the root package manifest modeled after `../graphify`
+  - [x] move from `ts/package.json` to a real root `package.json`
+  - [x] set the final package name
+  - [x] set `type`, `main`, `module`, `types`, and `exports`
+  - [x] add `files` so npm publishes only the intended runtime artifacts
+  - [x] add `engines.node`
+  - [x] align `license`, `repository`, `homepage`, and `bugs`
+- [x] Move the TypeScript project to repo root
+  - [x] move `ts/src` to root `src`
+  - [x] move `ts/whisper_bridge` to a root native directory
+  - [x] move `ts/tsconfig.json` to root `tsconfig.json`
+  - [x] move or recreate root `tests` for the TypeScript package
   - [ ] stop using `ts/` as a nested package boundary
-- [ ] Normalize the root build pipeline
-  - [ ] add root `build`, `dev`, `lint`, `test`, and `prepublishOnly` scripts
-  - [ ] integrate the native bridge build from the root package
-  - [ ] decide whether to use `tsc` only or `tsup`-style packaging at root
-  - [ ] make `npm pack` succeed from repo root
-- [ ] Clean up runtime path resolution
-  - [ ] remove the hard-coded path to `libwhisper_bridge.so`
-  - [ ] remove hard-coded model snapshot paths from library code
-  - [ ] resolve VAD and tokenizer assets relative to the installed package layout
-- [ ] Convert the current development fixtures into proper tests
-  - [ ] keep the current smoke scripts as tests or examples, not as the user-facing API
-  - [ ] ensure root `npm test` covers at least the existing migration proof points
+- [x] Normalize the root build pipeline
+  - [x] add root `build`, `dev`, `lint`, `test`, and `prepublishOnly` scripts
+  - [x] integrate the native bridge build from the root package
+  - [x] decide whether to use `tsc` only or `tsup`-style packaging at root
+  - [x] make `npm pack` succeed from repo root
+- [x] Clean up runtime path resolution
+  - [x] remove the hard-coded path to `libwhisper_bridge.so`
+  - [x] remove hard-coded model snapshot paths from library code
+  - [x] resolve VAD and tokenizer assets relative to the installed package layout
+- [x] Convert the current development fixtures into proper tests
+  - [x] keep the current smoke scripts as tests or examples, not as the user-facing API
+  - [x] ensure root `npm test` covers at least the existing migration proof points
 - [ ] Remove Python from the repository once the npm root is live
-  - [ ] delete the Python package tree `faster_whisper/`
-  - [ ] delete Python packaging files: `setup.py`, `setup.cfg`, `MANIFEST.in`, `requirements.txt`, `requirements.conversion.txt`
-  - [ ] delete or replace Python-specific tests under `tests/`
+  - [x] delete the tracked Python source files under `faster_whisper/`
+  - [x] delete Python packaging files: `setup.py`, `setup.cfg`, `MANIFEST.in`, `requirements.txt`, `requirements.conversion.txt`
+  - [x] delete or replace Python-specific tests under `tests/`
+  - [ ] remove the leftover local directories and binary remnants under `faster_whisper/`, `benchmark/`, and `docker/`
   - [ ] decide the fate of `benchmark/`:
     - [ ] port relevant benchmarks to Node.js
     - [ ] or remove them from the npm-only repository
@@ -170,8 +204,9 @@ Plan:
     - [ ] port to a Node/npm image
     - [ ] or remove it from the npm-only repository
 - [ ] Make the root repository clean and releasable
-  - [ ] ensure `git status --short` is clean after the move
-  - [ ] ensure there is no remaining nested `ts/` package
+  - [ ] remove the physical `ts/` directory from disk
+  - [ ] remove the accidental `graphify-out/` directory from disk
+  - [ ] ensure `git status --short` is clean after the move and commits
   - [ ] ensure the root repo can be cloned and built with npm only
 
 ## Lot 7 - README, Docs, License, And Attribution Cut-over
@@ -179,49 +214,49 @@ Plan:
 Goal: replace the current Python/PyPI-facing documentation with a Node/npm-facing documentation set while keeping the README coverage as close as possible to the current repository and clearly thanking the original project.
 
 Plan:
-- [ ] Rewrite the root `README.md` for the npm-only package
-  - [ ] replace PyPI/pip badges and installation instructions with npm equivalents
-  - [ ] replace Python examples with TypeScript/JavaScript examples
-  - [ ] document the root-level npm install/build/test flow
-  - [ ] document the native bridge prerequisites honestly
+- [x] Rewrite the root `README.md` for the npm-only package
+  - [x] replace PyPI/pip badges and installation instructions with npm equivalents
+  - [x] replace Python examples with TypeScript/JavaScript examples
+  - [x] document the root-level npm install/build/test flow
+  - [x] document the native bridge prerequisites honestly
 - [ ] Keep section-level parity with the current README where applicable
-  - [ ] intro and positioning
+  - [x] intro and positioning
   - [ ] benchmark/performance section
-  - [ ] requirements
-  - [ ] installation
-  - [ ] usage
+  - [x] requirements
+  - [x] installation
+  - [x] usage
   - [ ] word timestamps
-  - [ ] VAD filter
+  - [x] VAD filter
   - [ ] logging
   - [ ] going further / integrations
   - [ ] model conversion notes
   - [ ] performance comparison notes
 - [ ] For every current README section, choose one explicit outcome
-  - [ ] supported and documented in the npm package
-  - [ ] supported but deferred in docs until validated
+  - [x] supported and documented in the npm package
+  - [x] supported but deferred in docs until validated
   - [ ] intentionally removed from the npm-only port with explanation
-- [ ] Keep the project on the same free-license model
-  - [ ] stay on MIT unless a better-documented reason appears to change it
+- [x] Keep the project on the same free-license model
+  - [x] stay on MIT unless a better-documented reason appears to change it
   - [ ] update the copyright/authorship lines appropriately for the port
-  - [ ] ensure the original license obligations remain satisfied
-- [ ] Thank the original project explicitly
-  - [ ] add a clear acknowledgment in `README.md`
-  - [ ] identify the project as a TypeScript port of `SYSTRAN/faster-whisper`
-  - [ ] thank the original maintainers for the implementation and direction
-- [ ] Update supporting docs after the README rewrite
-  - [ ] `CONTRIBUTING.md`
+  - [x] ensure the original license obligations remain satisfied
+- [x] Thank the original project explicitly
+  - [x] add a clear acknowledgment in `README.md`
+  - [x] identify the project as a TypeScript port of `SYSTRAN/faster-whisper`
+  - [x] thank the original maintainers for the implementation and direction
+- [x] Update supporting docs after the README rewrite
+  - [x] `CONTRIBUTING.md`
   - [ ] release/build instructions
   - [ ] package publishing notes
 
 ## Exit Criteria
 
 - [x] The current TypeScript migration work is committed
-- [ ] The repository root is npm-only
-- [ ] The nested `ts/` package no longer exists
+- [ ] The repository root is npm-only and historical leftovers are removed
+- [ ] The nested `ts/` package no longer exists on disk
 - [ ] Python package and Python packaging files are removed from the repository
-- [ ] Root `npm install`, `npm run build`, `npm test`, and `npm pack` succeed
-- [ ] Runtime code no longer depends on repo-local absolute paths
-- [ ] The root `README.md` documents the npm package, not the old Python package
-- [ ] The project remains under a permissive free license
-- [ ] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
+- [x] Root `npm install`, `npm run build`, `npm test`, and `npm pack` succeed
+- [x] Runtime code no longer depends on repo-local absolute paths
+- [x] The root `README.md` documents the npm package, not the old Python package
+- [x] The project remains under a permissive free license
+- [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
 - [ ] `git status --short` is clean at the end of the cut-over
