@@ -9,10 +9,11 @@ This repository is published as a root-level npm package.
 - `cmake`
 - a C++17 compiler toolchain
 - npm publish rights for `faster-whisper-ts`
+- `ffmpeg` available on `PATH` for Node.js decoding, or `FASTER_WHISPER_FFMPEG_PATH` set explicitly
 
 The current release target is the Linux CPU path that builds `whisper_bridge` from source during install.
 
-Fresh installs still require network access for upstream dependency installers, notably `onnxruntime-node` and `ffmpeg-static`.
+Fresh installs still require network access for `onnxruntime-node`. Audio decoding in Node.js now relies on the system `ffmpeg` binary instead of `ffmpeg-static`.
 
 ## Release Checklist
 
