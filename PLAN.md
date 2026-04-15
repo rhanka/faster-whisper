@@ -15,7 +15,7 @@
   - [x] `node dist/test_transcribe.js`
 - [x] Verify whether everything has been committed
 - [x] Working tree is fully committed
-  - Current result: `git status --short --branch` is clean, with `master...origin/master [ahead 5]`
+  - Current result: `git status --short --branch` is clean, with local commits ahead of `origin/master`
   - Current result: `.codex` is ignored
   - Current result: the TypeScript migration work is now committed in logical chunks
 
