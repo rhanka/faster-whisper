@@ -12,8 +12,8 @@
   - [x] `NPM_CONFIG_CACHE=/tmp/faster-whisper-npm-cache npm run pack:check`
 - [x] Verify whether everything has been committed
 - [x] Working tree is fully committed
-  - Current result: `git status --short --branch` is clean after the cut-over commits
-  - Current result: later cleanup may create a final small commit for tracked leftovers
+  - Current result: `git status --short --branch` is clean after the final leftover-cleanup commit
+  - Current result: the branch now contains the full ordered cut-over history
 - [x] `.codex` is ignored
 - [x] Local migration leftovers are removed from disk
   - Current result: `ts/`, `faster_whisper/`, `benchmark/`, and `docker/` were removed locally after the root cut-over
@@ -72,7 +72,8 @@ Pending commit chunks:
 - [x] `feat: cut over to a root-level npm package` (`1be2964`)
 - [x] `chore: remove Python-first repository surface` (`51f0adc`)
 - [x] `docs: rewrite npm-only docs and CI` (`c38ac2d`)
-- [x] `chore: refresh cut-over plan after root migration`
+- [x] `chore: refresh cut-over plan after root migration` (`5aea4a1`)
+- [x] `chore: remove remaining migration leftovers` (`29c6562`)
 
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
@@ -193,7 +194,7 @@ Plan:
 - [x] Convert the current development fixtures into proper tests
   - [x] keep the current smoke scripts as tests or examples, not as the user-facing API
   - [x] ensure root `npm test` covers at least the existing migration proof points
-- [ ] Remove Python from the repository once the npm root is live
+- [x] Remove Python from the repository once the npm root is live
   - [x] delete the tracked Python source files under `faster_whisper/`
   - [x] delete Python packaging files: `setup.py`, `setup.cfg`, `MANIFEST.in`, `requirements.txt`, `requirements.conversion.txt`
   - [x] delete or replace Python-specific tests under `tests/`
@@ -205,7 +206,7 @@ Plan:
 - [ ] Make the root repository clean and releasable
   - [x] remove the physical `ts/` directory from disk
   - [x] keep `graphify-out/` ignored as local output
-  - [ ] ensure `git status --short` is clean after the move and commits
+  - [x] ensure `git status --short` is clean after the move and commits
   - [ ] ensure the root repo can be cloned and built with npm only
 
 ## Lot 7 - README, Docs, License, And Attribution Cut-over
@@ -258,4 +259,4 @@ Plan:
 - [x] The root `README.md` documents the npm package, not the old Python package
 - [x] The project remains under a permissive free license
 - [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
-- [ ] `git status --short` is clean at the end of the cut-over
+- [x] `git status --short` is clean at the end of the cut-over
