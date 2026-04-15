@@ -16,6 +16,7 @@
   "files": [
     "dist/src",
     "assets",
+    "RELEASING.md",
     "scripts/build-native.js",
     "scripts/fetch-test-model.js",
     "whisper_bridge/CMakeLists.txt",
