@@ -11,9 +11,9 @@
   - [x] `npm test`
   - [x] `NPM_CONFIG_CACHE=/tmp/faster-whisper-npm-cache npm run pack:check`
 - [x] Verify whether everything has been committed
-- [ ] Working tree is fully committed
-  - Current result: the root cut-over is now being committed in ordered chunks
-  - Current result: docs, CI, and final cleanup updates are still pending in the worktree
+- [x] Working tree is fully committed
+  - Current result: `git status --short --branch` is clean after the cut-over commits
+  - Current result: local ignored leftovers still exist on disk and are tracked separately below
 - [x] `.codex` is ignored
 - [ ] Local migration leftovers are removed from disk
   - Current result: `ts/`, `graphify-out/`, `benchmark/benchmark.m4a`, `docker/jfk.flac`, and empty legacy directories still exist locally
@@ -70,8 +70,8 @@ Checkpoint commits created:
 Pending commit chunks:
 - [x] `feat: cut over to a root-level npm package` (`1be2964`)
 - [x] `chore: remove Python-first repository surface` (`51f0adc`)
-- [x] `docs: rewrite npm-only docs and CI`
-- [ ] `chore: refresh cut-over plan after root migration`
+- [x] `docs: rewrite npm-only docs and CI` (`c38ac2d`)
+- [x] `chore: refresh cut-over plan after root migration`
 
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
@@ -257,4 +257,4 @@ Plan:
 - [x] The root `README.md` documents the npm package, not the old Python package
 - [x] The project remains under a permissive free license
 - [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
-- [ ] `git status --short` is clean at the end of the cut-over
+- [x] `git status --short` is clean at the end of the cut-over
