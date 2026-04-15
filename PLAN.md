@@ -43,8 +43,8 @@
    - [x] remove the Python-only `docker/` surface from the npm-only repository
    - [ ] decide whether prebuilt native binaries are deferred or planned
 3. [ ] Stabilize the transcription layer beyond the current smoke proof
-   - [ ] review and replace the remaining simplified/POC logic in `src/transcribe.ts`
-   - [ ] align the code and tests with the newly documented supported/deferred option surface
+   - [x] review and replace the remaining simplified/POC logic in `src/transcribe.ts`
+   - [x] align the code and tests with the newly documented supported/deferred option surface
    - [ ] broaden model coverage beyond the single tiny-model smoke path
 4. [ ] Finish documentation parity for the npm-only port
    - [ ] expand the README section coverage
@@ -153,16 +153,17 @@ Completed:
 
 Carry-over hardening:
 - [ ] Replace the current proof-by-smoke-test with an explicit parity matrix
-- [ ] Review simplified or POC-marked sections before calling the package stable
-  - [ ] replace the stubbed VAD timestamp remapping in `src/transcribe.ts`
-  - [ ] replace the simplified timestamp split logic in `src/transcribe.ts`
-  - [ ] replace the simplified seek advancement logic in `src/transcribe.ts`
+- [x] Review simplified or POC-marked sections before calling the package stable
+  - [x] replace the stubbed VAD timestamp remapping in `src/transcribe.ts`
+  - [x] replace the simplified timestamp split logic in `src/transcribe.ts`
+  - [x] replace the simplified seek advancement logic in `src/transcribe.ts`
 - [x] Decide which features are fully supported at cut-over time versus explicitly deferred
   - [x] `wordTimestamps` is explicitly deferred
   - [x] `clipTimestamps` is explicitly deferred
   - [x] `hallucinationSilenceThreshold` is explicitly deferred
   - [x] `hotwords` is explicitly deferred
   - [x] `languageDetectionThreshold` / `languageDetectionSegments` are explicitly deferred
+- [x] Reject deferred transcription options explicitly in code and tests
 
 ## Lot 6 - Root-Level npm Package Finalization
 

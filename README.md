@@ -15,10 +15,11 @@ Thanks to the original `faster-whisper` project for the implementation direction
   - feature extraction
   - VAD
   - end-to-end transcription on `tests/data/jfk.flac`
+- Transcription timestamp splitting and VAD timestamp restoration now follow the upstream logic instead of the earlier POC shortcuts.
+- Deferred transcription options now fail fast with explicit errors instead of being silently ignored.
 - Some parity work is still pending before claiming full upstream coverage:
   - full benchmark matrix
   - documentation parity across every upstream section
-  - cleanup of remaining POC-marked transcription sections
   - broader model/runtime validation
 
 ## Requirements
@@ -103,6 +104,8 @@ Currently deferred until the TypeScript port is stabilized further:
 - `languageDetectionThreshold`
 - `languageDetectionSegments`
 - broader multilingual/runtime validation beyond the current smoke path
+
+When one of these deferred options is passed today, the TypeScript port throws an explicit error instead of silently accepting unsupported behavior.
 
 ## VAD
 

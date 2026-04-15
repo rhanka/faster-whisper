@@ -79,11 +79,107 @@ function getCompressionRatio(text: string): number {
     return textBytes.length / compressed.length;
 }
 
+interface RawTimestampSegment {
+    seek: number;
+    start: number;
+    end: number;
+    tokens: number[];
+}
+
+class SpeechTimestampsMap {
+    private samplingRate: number;
+    private timePrecision: number;
+    private chunkEndSample: number[] = [];
+    private totalSilenceBefore: number[] = [];
+
+    constructor(chunks: SpeechSegment[], samplingRate: number, timePrecision: number = 2) {
+        this.samplingRate = samplingRate;
+        this.timePrecision = timePrecision;
+
+        let previousEnd = 0;
+        let silentSamples = 0;
+
+        for (const chunk of chunks) {
+            const chunkEnd = chunk.end ?? chunk.start;
+            silentSamples += chunk.start - previousEnd;
+            previousEnd = chunkEnd;
+
+            this.chunkEndSample.push(chunkEnd - silentSamples);
+            this.totalSilenceBefore.push(silentSamples / samplingRate);
+        }
+    }
+
+    getOriginalTime(time: number, chunkIndex?: number, isEnd: boolean = false): number {
+        const resolvedChunkIndex = chunkIndex ?? this.getChunkIndex(time, isEnd);
+        const totalSilenceBefore = this.totalSilenceBefore[resolvedChunkIndex] ?? 0;
+        return Number((totalSilenceBefore + time).toFixed(this.timePrecision));
+    }
+
+    getChunkIndex(time: number, isEnd: boolean = false): number {
+        const sample = Math.floor(time * this.samplingRate);
+        if (isEnd) {
+            const exactIndex = this.chunkEndSample.indexOf(sample);
+            if (exactIndex !== -1) {
+                return exactIndex;
+            }
+        }
+
+        let low = 0;
+        let high = this.chunkEndSample.length;
+
+        while (low < high) {
+            const mid = Math.floor((low + high) / 2);
+            if (sample < (this.chunkEndSample[mid] ?? sample)) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        return Math.min(low, Math.max(this.chunkEndSample.length - 1, 0));
+    }
+}
+
+function restoreSpeechTimestamps(
+    segments: Segment[],
+    speechChunks: SpeechSegment[],
+    samplingRate: number
+): Segment[] {
+    const timestampMap = new SpeechTimestampsMap(speechChunks, samplingRate);
+
+    return segments.map((segment) => {
+        if (segment.words && segment.words.length > 0) {
+            const words = segment.words.map((word) => {
+                const middle = (word.start + word.end) / 2;
+                const chunkIndex = timestampMap.getChunkIndex(middle);
+                return {
+                    ...word,
+                    start: timestampMap.getOriginalTime(word.start, chunkIndex),
+                    end: timestampMap.getOriginalTime(word.end, chunkIndex),
+                };
+            });
+
+            return {
+                ...segment,
+                start: words[0]!.start,
+                end: words[words.length - 1]!.end,
+                words,
+            };
+        }
+
+        return {
+            ...segment,
+            start: timestampMap.getOriginalTime(segment.start),
+            end: timestampMap.getOriginalTime(segment.end, undefined, true),
+        };
+    });
+}
+
 export class WhisperModel {
     private model: BridgeWhisperModel;
     private featureExtractor: FeatureExtractor;
     private hfTokenizer: HFTokenizer | null = null;
-    public isMultilingual: boolean = false; // Simplified, assuming auto-detected or passed
+    public isMultilingual: boolean = false;
     private modelPath: string;
     
     public inputStride = 2;
@@ -131,6 +227,8 @@ export class WhisperModel {
         language?: LanguageCode,
         task: Task = "transcribe"
     ): Promise<[Segment[], TranscriptionInfo]> {
+        this.validateDeferredOptions(options);
+
         const samplingRate = this.featureExtractor.samplingRate;
         let audio: Float32Array;
 
@@ -184,11 +282,6 @@ export class WhisperModel {
 
         const segments = await this.generateSegments(features, expectedFrames, tokenizer, options, temperatures);
 
-        // Map back timestamps if VAD was used
-        if (speechChunks && speechChunks.length > 0) {
-            // Simplified mapping for POC, typically requires SpeechTimestampsMap
-        }
-
         const info: TranscriptionInfo = {
             language: actualLanguage,
             language_probability: languageProbability,
@@ -200,7 +293,11 @@ export class WhisperModel {
             info.vad_options = options.vadParameters;
         }
 
-        return [segments, info];
+        const outputSegments = speechChunks && speechChunks.length > 0
+            ? restoreSpeechTimestamps(segments, speechChunks, samplingRate)
+            : segments;
+
+        return [outputSegments, info];
     }
 
     private async generateSegments(
@@ -315,50 +412,172 @@ export class WhisperModel {
             const { result, avgLogprob, text, compressionRatio } = bestResult!;
             const tokens = result.tokens;
 
-            // Simple split by timestamps (simplified for POC without consecutive logic)
-            let duration = segmentSize * this.featureExtractor.timePerFrame;
-            const timestamps = tokens.filter((t: number) => t >= tokenizer.timestampBegin!);
-            if (timestamps.length > 0 && timestamps[timestamps.length - 1] !== tokenizer.timestampBegin!) {
-                const lastTimestampPos = timestamps[timestamps.length - 1] - tokenizer.timestampBegin!;
-                duration = lastTimestampPos * this.timePrecision;
+            if (options.noSpeechThreshold != null) {
+                let shouldSkip = result.no_speech_prob > options.noSpeechThreshold;
+                if (options.logProbThreshold != null && avgLogprob > options.logProbThreshold) {
+                    shouldSkip = false;
+                }
+                if (shouldSkip) {
+                    seek += segmentSize;
+                    continue;
+                }
             }
 
-            if (text.trim()) {
+            const previousSeek = seek;
+            const [rawSegments, nextSeek] = this.splitSegmentsByTimestamps(
+                tokenizer,
+                tokens,
+                timeOffset,
+                segmentSize,
+                segmentSize * this.featureExtractor.timePerFrame,
+                seek
+            );
+
+            seek = nextSeek;
+            for (const rawSegment of rawSegments) {
+                const segmentText = tokenizer.decode(rawSegment.tokens);
+                if (rawSegment.start === rawSegment.end || !segmentText.trim()) {
+                    continue;
+                }
+
                 idx++;
                 segments.push({
                     id: idx,
-                    seek: seek,
-                    start: timeOffset,
-                    end: timeOffset + duration,
-                    text: text,
-                    tokens: tokens,
+                    seek: previousSeek,
+                    start: rawSegment.start,
+                    end: rawSegment.end,
+                    text: segmentText,
+                    tokens: rawSegment.tokens,
                     temperature: usedTemperature,
                     avg_logprob: avgLogprob,
                     compression_ratio: compressionRatio,
                     no_speech_prob: result.no_speech_prob
                 });
-                allTokens.push(...tokens);
+                allTokens.push(...rawSegment.tokens);
             }
 
-            // Seek logic (simplified)
-            let lastTimestampPosition = 0;
-            let seekAdvancement = segmentSize;
-            if (timestamps.length > 0 && timestamps[timestamps.length - 1] !== tokenizer.timestampBegin!) {
-                lastTimestampPosition = timestamps[timestamps.length - 1] - tokenizer.timestampBegin!;
-                seekAdvancement = lastTimestampPosition * this.inputStride;
+            if (!options.conditionOnPreviousText || usedTemperature > (options.promptResetOnTemperature ?? 0.5)) {
+                promptResetSince = allTokens.length;
             }
-            
-            // Prevent infinite loop if seekAdvancement is 0 or negative
-            if (seekAdvancement <= 0) {
-                seekAdvancement = segmentSize;
+
+            if (seek <= previousSeek) {
+                seek = previousSeek + segmentSize;
             }
-            
-            seek += seekAdvancement;
 
             if (seek >= contentFrames) break;
         }
 
         return segments;
+    }
+
+    private splitSegmentsByTimestamps(
+        tokenizer: HFTokenizerWrapper,
+        tokens: number[],
+        timeOffset: number,
+        segmentSize: number,
+        segmentDuration: number,
+        seek: number
+    ): [RawTimestampSegment[], number, boolean] {
+        const currentSegments: RawTimestampSegment[] = [];
+        const timestampBegin = tokenizer.timestampBegin;
+
+        if (timestampBegin === null) {
+            currentSegments.push({
+                seek,
+                start: timeOffset,
+                end: timeOffset + segmentDuration,
+                tokens,
+            });
+            return [currentSegments, seek + segmentSize, false];
+        }
+
+        const singleTimestampEnding = (
+            tokens.length >= 2
+            && tokens[tokens.length - 2]! < timestampBegin
+            && tokens[tokens.length - 1]! >= timestampBegin
+        );
+
+        const consecutiveTimestamps: number[] = [];
+        for (let i = 1; i < tokens.length; i++) {
+            if (tokens[i]! >= timestampBegin && tokens[i - 1]! >= timestampBegin) {
+                consecutiveTimestamps.push(i);
+            }
+        }
+
+        if (consecutiveTimestamps.length > 0) {
+            const slices = [...consecutiveTimestamps];
+            if (singleTimestampEnding) {
+                slices.push(tokens.length);
+            }
+
+            let lastSlice = 0;
+            for (const currentSlice of slices) {
+                const slicedTokens = tokens.slice(lastSlice, currentSlice);
+                if (slicedTokens.length === 0) {
+                    lastSlice = currentSlice;
+                    continue;
+                }
+
+                const startTimestampPosition = Math.max(0, slicedTokens[0]! - timestampBegin);
+                const endTimestampPosition = Math.max(
+                    startTimestampPosition,
+                    slicedTokens[slicedTokens.length - 1]! - timestampBegin
+                );
+
+                currentSegments.push({
+                    seek,
+                    start: timeOffset + startTimestampPosition * this.timePrecision,
+                    end: timeOffset + endTimestampPosition * this.timePrecision,
+                    tokens: slicedTokens,
+                });
+                lastSlice = currentSlice;
+            }
+
+            if (singleTimestampEnding) {
+                seek += segmentSize;
+            } else {
+                const lastTimestampPosition = Math.max(
+                    0,
+                    (tokens[lastSlice - 1] ?? timestampBegin) - timestampBegin
+                );
+                seek += lastTimestampPosition * this.inputStride;
+            }
+        } else {
+            let duration = segmentDuration;
+            const timestamps = tokens.filter((token) => token >= timestampBegin);
+            if (timestamps.length > 0 && timestamps[timestamps.length - 1] !== timestampBegin) {
+                const lastTimestampPosition = timestamps[timestamps.length - 1]! - timestampBegin;
+                duration = lastTimestampPosition * this.timePrecision;
+            }
+
+            currentSegments.push({
+                seek,
+                start: timeOffset,
+                end: timeOffset + duration,
+                tokens,
+            });
+
+            seek += segmentSize;
+        }
+
+        return [currentSegments, seek, singleTimestampEnding];
+    }
+
+    private validateDeferredOptions(options: TranscriptionOptions): void {
+        const deferredOptions: string[] = [];
+
+        if (options.wordTimestamps) deferredOptions.push('wordTimestamps');
+        if (options.clipTimestamps !== undefined) deferredOptions.push('clipTimestamps');
+        if (options.hallucinationSilenceThreshold != null) deferredOptions.push('hallucinationSilenceThreshold');
+        if (options.hotwords != null) deferredOptions.push('hotwords');
+        if (options.languageDetectionThreshold !== undefined) deferredOptions.push('languageDetectionThreshold');
+        if (options.languageDetectionSegments !== undefined) deferredOptions.push('languageDetectionSegments');
+
+        if (deferredOptions.length > 0) {
+            throw new Error(
+                `Unsupported transcription option(s) in the current TypeScript port: ${deferredOptions.join(', ')}`
+            );
+        }
     }
 
     private getPrompt(tokenizer: HFTokenizerWrapper, previousTokens: number[], withoutTimestamps: boolean = false, prefix?: string): number[] {
