@@ -8,7 +8,8 @@ Thanks to the original `faster-whisper` project for the implementation direction
 
 - Root package is now npm-only.
 - Native bridge build works from repo root.
-- This first npm line is being prepared as `v1.2.1`, aligned with the last upstream Python baseline version, but it does **not** claim full feature parity with upstream `faster-whisper`.
+- Current npm package version is `0.1.0` because full parity with upstream Python `faster-whisper` `1.2.1` is not demonstrated yet.
+- Stable `v1.2.1` is reserved for a future parity-grade release.
 - Current smoke coverage passes on:
   - bridge load/free
   - audio decoding
@@ -112,9 +113,9 @@ Currently deferred until the TypeScript port is stabilized further:
 
 When one of these deferred options is passed today, the TypeScript port throws an explicit error instead of silently accepting unsupported behavior.
 
-## Limitations In `v1.2.1`
+## Current Limitations Before Stable `v1.2.1`
 
-The first npm release is intentionally scoped. It is validated for the current Node.js/Linux path, but it is **not** a 100% parity release with upstream Python `faster-whisper`.
+The current npm line is intentionally scoped. It is validated for the current Node.js/Linux path, but it is **not** a 100% parity release with upstream Python `faster-whisper`.
 
 Documented release limitations:
 
@@ -129,7 +130,7 @@ Documented release limitations:
 - `languageDetectionSegments` is not implemented
 - parity is demonstrated by smoke coverage and CI on the supported path, not by a full upstream option-by-option matrix
 
-If you need one of the deferred options above today, this npm release is not the final parity target yet.
+If you need one of the deferred options above today, this npm line is not the final parity target yet.
 
 ## Word Timestamps
 
