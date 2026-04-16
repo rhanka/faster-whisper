@@ -8,6 +8,7 @@ Thanks to the original `faster-whisper` project for the implementation direction
 
 - Root package is now npm-only.
 - Native bridge build works from repo root.
+- This first npm line is being prepared as `v1.2.1`, aligned with the last upstream Python baseline version, but it does **not** claim full feature parity with upstream `faster-whisper`.
 - Current smoke coverage passes on:
   - bridge load/free
   - audio decoding
@@ -20,6 +21,7 @@ Thanks to the original `faster-whisper` project for the implementation direction
 - Some parity work is still pending before claiming full upstream coverage:
   - full benchmark matrix
   - broader model/runtime validation
+  - deferred transcription options listed below
 
 ## Requirements
 
@@ -109,6 +111,25 @@ Currently deferred until the TypeScript port is stabilized further:
 - broader multilingual/runtime validation beyond the current smoke path
 
 When one of these deferred options is passed today, the TypeScript port throws an explicit error instead of silently accepting unsupported behavior.
+
+## Limitations In `v1.2.1`
+
+The first npm release is intentionally scoped. It is validated for the current Node.js/Linux path, but it is **not** a 100% parity release with upstream Python `faster-whisper`.
+
+Documented release limitations:
+
+- supported release target: Node.js 20+ on the current Linux CPU path
+- browser/WASM audio fallback is kept in code, but is not declared stable
+- GPU runtime variants and prebuilt native binaries are not part of this release
+- `wordTimestamps` is not implemented in the stable npm surface
+- `clipTimestamps` is not implemented
+- `hallucinationSilenceThreshold` is not implemented
+- `hotwords` is not implemented
+- `languageDetectionThreshold` is not implemented
+- `languageDetectionSegments` is not implemented
+- parity is demonstrated by smoke coverage and CI on the supported path, not by a full upstream option-by-option matrix
+
+If you need one of the deferred options above today, this npm release is not the final parity target yet.
 
 ## Word Timestamps
 
@@ -216,6 +237,7 @@ This repository is not claiming complete feature parity with upstream `faster-wh
 - benchmark reproduction in Node beyond the current smoke coverage
 - broader model/runtime validation beyond the tiny-model Linux CPU path
 - stable word-timestamp parity
+- clip-based seek controls and the remaining deferred transcription options listed above
 
 ## License
 

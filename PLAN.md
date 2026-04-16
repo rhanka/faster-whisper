@@ -32,6 +32,9 @@
   - [x] `typescript` points to the npm-only branch tip
 - [x] Align the first detached TypeScript release target with the Python baseline version
   - [x] npm package version target is `1.2.1`
+- [x] Document the first npm release as a limited parity release
+  - [x] README explicitly lists the supported scope and deferred options for `v1.2.1`
+  - [x] post-release implementation work is tracked below instead of being implied away
 - [x] Detach the GitHub repository from the upstream fork network
   - [x] backup mirror created in `/tmp/faster-whisper.detach-backup.git`
   - [x] `rhanka/faster-whisper` recreated as a standalone repository
@@ -81,6 +84,14 @@
    - [x] verify GitHub Actions on the detached `typescript` branch
    - [ ] tag `v1.2.1`
    - [ ] publish the npm package
+8. [ ] Start post-release parity implementation for deferred options
+   - [ ] implement `wordTimestamps`
+   - [ ] implement `clipTimestamps`
+   - [ ] implement `hallucinationSilenceThreshold`
+   - [ ] implement `hotwords`
+   - [ ] implement `languageDetectionThreshold`
+   - [ ] implement `languageDetectionSegments`
+   - [ ] broaden the parity and model-validation matrix
 
 ## Lot 0 - Commit Hygiene And Baseline
 
@@ -322,6 +333,38 @@ Plan:
   - [ ] tag `v1.2.1`
   - [ ] publish the npm package
 
+## Lot 9 - Post-Release Parity Implementation
+
+Goal: publish `v1.2.1` with explicit limitations, then continue the TypeScript port until the currently deferred transcription options and parity gaps are closed.
+
+Release posture for `v1.2.1`:
+
+- [x] publish only with explicit limitation notes in `README.md`
+- [x] keep the supported target scoped to the currently validated Node.js/Linux CPU path
+- [x] treat unsupported transcription options as explicit follow-up work, not hidden parity claims
+
+Post-release implementation plan:
+
+- [ ] implement stable `wordTimestamps` support
+  - [ ] align timestamp token handling and segment/word boundaries with upstream behavior
+  - [ ] add regression tests beyond the current JFK smoke
+- [ ] implement `clipTimestamps`
+  - [ ] match seek/window semantics with upstream behavior
+  - [ ] add API and regression coverage
+- [ ] implement `hallucinationSilenceThreshold`
+  - [ ] port the threshold behavior from the Python logic
+  - [ ] validate against representative silence-heavy fixtures
+- [ ] implement `hotwords`
+  - [ ] define the prompt wiring and tokenizer behavior in TypeScript
+  - [ ] add targeted prompt-conditioning tests
+- [ ] implement `languageDetectionThreshold` and `languageDetectionSegments`
+  - [ ] port the language-detection loop and thresholds
+  - [ ] add multilingual validation fixtures
+- [ ] broaden validation after each feature lot
+  - [ ] multi-model coverage beyond the current tiny-model path
+  - [ ] broader runtime/platform matrix where realistic
+  - [ ] explicit parity matrix in docs and CI instead of smoke-only evidence
+
 ## Exit Criteria
 
 - [x] The current TypeScript migration work is committed
@@ -337,4 +380,5 @@ Plan:
 - [x] `python-origin` preserves the last Python baseline
 - [x] `typescript` becomes the default branch after fork detach
 - [ ] The first detached TypeScript release is tagged and published as `v1.2.1`
+- [ ] Deferred transcription options are implemented or remain explicitly documented as limitations
 - [x] `git status --short` is clean at the end of the cut-over
