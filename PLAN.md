@@ -31,6 +31,10 @@
   - [x] `typescript` points to the npm-only branch tip
 - [x] Align the first detached TypeScript release target with the Python baseline version
   - [x] npm package version target is `1.2.1`
+- [x] Detach the GitHub repository from the upstream fork network
+  - [x] backup mirror created in `/tmp/faster-whisper.detach-backup.git`
+  - [x] `rhanka/faster-whisper` recreated as a standalone repository
+  - [x] default branch switched to `typescript`
 
 ## Guardrails
 
@@ -69,11 +73,11 @@
    - [x] create `typescript`
    - [x] align the first TypeScript release target to `1.2.1`
 6. [ ] Detach the GitHub fork and promote `typescript` as the primary branch
-   - [ ] break the current fork relationship on GitHub
-   - [ ] switch the default branch from `master` to `typescript`
+   - [x] break the current fork relationship on GitHub
+   - [x] switch the default branch from `master` to `typescript`
 7. [ ] Re-run CI on the release-shaped branch tip and publish
    - [x] expand GitHub Actions triggers to include `typescript`
-   - [x] verify GitHub Actions on `typescript`
+   - [ ] verify GitHub Actions on the detached `typescript` branch
    - [ ] tag `v1.2.1`
    - [ ] publish the npm package
 
@@ -293,8 +297,8 @@ Goal: preserve the last Python state as a reference branch, promote the npm-only
 Plan:
 - [x] Confirm the current GitHub repository is still a fork of `SYSTRAN/faster-whisper`
 - [ ] Detach the GitHub fork relationship
-  - [ ] use the GitHub-supported detach flow if available
-  - [ ] otherwise delete and recreate the repository while preserving branches/tags
+  - [x] use the GitHub-supported detach flow if available
+  - [x] otherwise delete and recreate the repository while preserving branches/tags
 - [x] Preserve the Python baseline as a continuity branch
   - [x] create `python-origin`
   - [x] pin it to `ed9a06c`
@@ -303,7 +307,7 @@ Plan:
   - [x] create `typescript`
   - [x] point it at the current npm-only release candidate
 - [ ] Promote the TypeScript line after detach
-  - [ ] switch the default branch to `typescript`
+  - [x] switch the default branch to `typescript`
   - [ ] keep `master` only as a temporary transition branch or remove it after the switch
 - [x] Define the version mapping explicitly
   - [x] `python-origin` => frozen Python-compatible baseline `1.2.1`
@@ -312,7 +316,7 @@ Plan:
 - [ ] Re-run release validation on the detached line
   - [x] expand GitHub Actions triggers to include `typescript`
   - [x] push `typescript`
-  - [x] verify GitHub Actions on `typescript`
+  - [ ] verify GitHub Actions on the detached repository
   - [ ] tag `v1.2.1`
   - [ ] publish the npm package
 
@@ -329,6 +333,6 @@ Plan:
 - [x] The project remains under a permissive free license
 - [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
 - [x] `python-origin` preserves the last Python baseline
-- [ ] `typescript` becomes the default branch after fork detach
+- [x] `typescript` becomes the default branch after fork detach
 - [ ] The first detached TypeScript release is tagged and published as `v1.2.1`
 - [x] `git status --short` is clean at the end of the cut-over
