@@ -10,6 +10,7 @@
   - [x] `npm run build`
   - [x] `npm test`
   - [x] `NPM_CONFIG_CACHE=/tmp/faster-whisper-npm-cache npm run pack:check`
+- [x] Add and validate a pristine tarball install smoke test
 - [x] Verify whether everything has been committed
 - [x] Working tree is fully committed
   - Current result: `git status --short --branch` is clean after the final leftover-cleanup commit
@@ -18,7 +19,7 @@
 - [x] Local migration leftovers are removed from disk
   - Current result: `ts/`, `faster_whisper/`, `benchmark/`, and `docker/` were removed locally after the root cut-over
   - Current result: `graphify-out/` is intentionally kept as a local ignored output directory
-  - Current result: a fresh clone check in `/tmp/faster-whisper-release-check` reached an external installer blocker in `onnxruntime-node`
+  - Current result: pristine tarball install and fresh-clone `npm ci` / `npm run build` now pass in `/tmp/faster-whisper-release-check`
 
 ## Guardrails
 
@@ -79,6 +80,8 @@ Pending commit chunks:
 - [x] `docs: add npm release and publishing guide` (`4c60b9c`)
 - [x] `docs: expand README parity coverage` (`639b361`)
 - [x] `docs: note fresh install network requirements` (`7757fdd`)
+- [x] `chore: switch node audio decoding to system ffmpeg` (`4bfb62d`)
+- [ ] `ci: add pristine tarball install smoke test`
 
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
@@ -193,6 +196,7 @@ Plan:
   - [x] integrate the native bridge build from the root package
   - [x] decide whether to use `tsc` only or `tsup`-style packaging at root
   - [x] make `npm pack` succeed from repo root
+  - [x] add a pristine tarball install smoke test modeled after `../voxtral-ts`
 - [x] Clean up runtime path resolution
   - [x] remove the hard-coded path to `libwhisper_bridge.so`
   - [x] remove hard-coded model snapshot paths from library code
@@ -213,8 +217,8 @@ Plan:
   - [x] remove the physical `ts/` directory from disk
   - [x] keep `graphify-out/` ignored as local output
   - [x] ensure `git status --short` is clean after the move and commits
-  - [ ] ensure the root repo can be cloned and built with npm only
-    - Current blocker: fresh `npm ci` from a clean clone still depends on upstream network downloads in `onnxruntime-node`
+  - [x] ensure the root repo can be cloned and built with npm only
+    - Current result: `npm ci` and `npm run build` passed in `/tmp/faster-whisper-release-check`
 
 ## Lot 7 - README, Docs, License, And Attribution Cut-over
 

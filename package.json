@@ -40,9 +40,10 @@
     "test:vad": "node dist/tests/test_vad.js",
     "test:transcribe": "node dist/tests/test_transcribe.js",
     "test:smoke": "npm run test:bridge && npm run test:audio && npm run test:tokenizer && npm run test:feature-extractor && npm run test:vad && npm run test:transcribe",
+    "test:pristine-install": "bash ./scripts/smoke-test.sh",
     "test": "npm run build && npm run test:prepare-model && npm run test:smoke",
     "pack:check": "npm pack --dry-run",
-    "prepublishOnly": "npm run test",
+    "prepublishOnly": "npm run test && npm run test:pristine-install",
     "postinstall": "npm run build:native"
   },
   "keywords": [
