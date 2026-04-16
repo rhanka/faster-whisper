@@ -17,6 +17,7 @@
   - [x] `TypeScript CI` is active on GitHub
   - [x] run `24485316095` succeeded on `master`
   - [x] run `24485580650` succeeded on `typescript`
+  - [x] run `24487017706` succeeded on detached `typescript` via `workflow_dispatch`
 - [x] Verify whether everything has been committed
 - [x] Working tree is fully committed
   - Current result: `git status --short --branch` is clean after the final leftover-cleanup commit
@@ -77,7 +78,7 @@
    - [x] switch the default branch from `master` to `typescript`
 7. [ ] Re-run CI on the release-shaped branch tip and publish
    - [x] expand GitHub Actions triggers to include `typescript`
-   - [ ] verify GitHub Actions on the detached `typescript` branch
+   - [x] verify GitHub Actions on the detached `typescript` branch
    - [ ] tag `v1.2.1`
    - [ ] publish the npm package
 
@@ -316,7 +317,8 @@ Plan:
 - [ ] Re-run release validation on the detached line
   - [x] expand GitHub Actions triggers to include `typescript`
   - [x] push `typescript`
-  - [ ] verify GitHub Actions on the detached repository
+  - [x] verify GitHub Actions on the detached repository
+  - [x] add `workflow_dispatch` as an explicit CI recovery path on the detached repo
   - [ ] tag `v1.2.1`
   - [ ] publish the npm package
 
