@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - master
+      - typescript
     tags:
       - v*
   pull_request:
     branches:
       - master
+      - typescript
 
 jobs:
   build-test-pack:
