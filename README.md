@@ -136,6 +136,7 @@ Run the full local validation flow from the repository root:
 
 ```bash
 npm test
+npm run test:pristine-install
 ```
 
 `npm test` will:
@@ -149,6 +150,8 @@ If you already have a converted CTranslate2 model elsewhere, point tests to it:
 ```bash
 FASTER_WHISPER_TEST_MODEL=/absolute/path/to/model npm test
 ```
+
+`npm run test:pristine-install` adds the release-style smoke check: it packs the library, creates an empty temp project, runs `npm install <tarball>`, then verifies the installed runtime dependencies, native build output, and root exports from that clean install.
 
 ## Benchmark And Performance
 
@@ -172,6 +175,7 @@ Useful root-level commands:
 npm run build
 npm run lint
 npm test
+npm run test:pristine-install
 npm run pack:check
 ```
 

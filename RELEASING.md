@@ -26,10 +26,11 @@ npm ci
 npm run build
 npm run lint
 npm test
+npm run test:pristine-install
 npm run pack:check
 ```
 
-If you want to simulate a clean machine, run the same sequence from a fresh clone with network access enabled for npm dependency install scripts.
+`npm run test:pristine-install` is the tarball smoke test: it installs the packed library into an empty temp project and verifies the installed package surface there.
 
 4. Inspect the tarball contents if needed:
 
