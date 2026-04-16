@@ -71,6 +71,7 @@
    - [ ] break the current fork relationship on GitHub
    - [ ] switch the default branch from `master` to `typescript`
 7. [ ] Re-run CI on the release-shaped branch tip and publish
+   - [x] expand GitHub Actions triggers to include `typescript`
    - [ ] verify GitHub Actions on `typescript`
    - [ ] tag `v1.2.1`
    - [ ] publish the npm package
@@ -308,6 +309,7 @@ Plan:
   - [x] `typescript` => detached npm-only line starting at `1.2.1`
   - [x] do not publish a detached `0.x` version line
 - [ ] Re-run release validation on the detached line
+  - [x] expand GitHub Actions triggers to include `typescript`
   - [ ] push `typescript`
   - [ ] verify GitHub Actions on `typescript`
   - [ ] tag `v1.2.1`
