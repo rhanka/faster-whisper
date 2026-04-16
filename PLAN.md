@@ -16,6 +16,7 @@
 - [x] Verify GitHub Actions on the migrated repository
   - [x] `TypeScript CI` is active on GitHub
   - [x] run `24485316095` succeeded on `master`
+  - [x] run `24485580650` succeeded on `typescript`
 - [x] Verify whether everything has been committed
 - [x] Working tree is fully committed
   - Current result: `git status --short --branch` is clean after the final leftover-cleanup commit
@@ -72,7 +73,7 @@
    - [ ] switch the default branch from `master` to `typescript`
 7. [ ] Re-run CI on the release-shaped branch tip and publish
    - [x] expand GitHub Actions triggers to include `typescript`
-   - [ ] verify GitHub Actions on `typescript`
+   - [x] verify GitHub Actions on `typescript`
    - [ ] tag `v1.2.1`
    - [ ] publish the npm package
 
@@ -310,8 +311,8 @@ Plan:
   - [x] do not publish a detached `0.x` version line
 - [ ] Re-run release validation on the detached line
   - [x] expand GitHub Actions triggers to include `typescript`
-  - [ ] push `typescript`
-  - [ ] verify GitHub Actions on `typescript`
+  - [x] push `typescript`
+  - [x] verify GitHub Actions on `typescript`
   - [ ] tag `v1.2.1`
   - [ ] publish the npm package
 
