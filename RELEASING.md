@@ -1,6 +1,6 @@
 # Releasing
 
-This repository is published as a root-level npm package.
+This repository is prepared as a root-level npm package.
 
 ## Preconditions
 
@@ -19,7 +19,8 @@ Fresh installs still require network access for `onnxruntime-node`. Audio decodi
 
 1. Work from a clean branch tip.
 2. Update `package.json` version.
-   The first detached TypeScript release should stay aligned with the upstream Python baseline at `1.2.1`.
+   Do not use stable `1.2.1` until the TypeScript port reaches parity with upstream Python `faster-whisper` `1.2.1`.
+   The current non-parity npm line stays on `0.1.0`.
 3. Validate the package from the repository root:
 
 ```bash
@@ -41,13 +42,21 @@ tar -tf faster-whisper-ts-*.tgz
 rm faster-whisper-ts-*.tgz
 ```
 
-5. Publish from the repository root:
+5. Publish from the repository root only after deciding the release track:
+
+For a non-parity preview, keep a `0.x` version and publish under a non-default dist tag:
+
+```bash
+npm publish --tag next
+```
+
+For the stable parity release, first complete the parity work in `PLAN.md`, then publish:
 
 ```bash
 npm publish
 ```
 
-6. Tag the detached TypeScript release from the `typescript` branch:
+6. Tag the stable parity release from the `typescript` branch only after parity is implemented and validated:
 
 ```bash
 git tag v1.2.1

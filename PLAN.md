@@ -30,11 +30,12 @@
 - [x] Establish continuity branches before detaching the fork
   - [x] `python-origin` points to `ed9a06c`
   - [x] `typescript` points to the npm-only branch tip
-- [x] Align the first detached TypeScript release target with the Python baseline version
-  - [x] npm package version target is `1.2.1`
-- [x] Document the first npm release as a limited parity release
-  - [x] README explicitly lists the supported scope and deferred options for `v1.2.1`
-  - [x] post-release implementation work is tracked below instead of being implied away
+- [x] Do not publish the detached TypeScript line as stable `1.2.1` until parity is implemented and validated
+  - [x] npm package version reset to `0.1.0` for the current non-parity line
+  - [x] stable `v1.2.1` is reserved for the future parity-grade release
+- [x] Document the current npm line as a limited parity line
+  - [x] README explicitly lists the supported scope and deferred options before stable `v1.2.1`
+  - [x] parity implementation work is tracked below instead of being implied away
 - [x] Detach the GitHub repository from the upstream fork network
   - [x] backup mirror created in `/tmp/faster-whisper.detach-backup.git`
   - [x] `rhanka/faster-whisper` recreated as a standalone repository
@@ -52,7 +53,8 @@
 - [x] Do not delete Python files until the root-level npm package builds and tests successfully from repo root
 - [x] Eliminate all hard-coded absolute local paths before calling the package releasable
 - [x] Keep `python-origin` as the frozen Python continuity branch until an explicit realignment plan exists
-- [x] Do not publish a new detached TypeScript release on a `0.x` line when the parity baseline is Python `1.2.1`
+- [x] Do not publish or tag stable `v1.2.1` until the TypeScript port reaches parity with Python `1.2.1`
+- [x] Use `0.x` only for a clearly labeled non-parity preview line if any preview is published before parity
 
 ## Remaining Order
 
@@ -75,16 +77,17 @@
 5. [x] Establish the branch and version mapping for the detached TypeScript line
    - [x] create `python-origin`
    - [x] create `typescript`
-   - [x] align the first TypeScript release target to `1.2.1`
+   - [x] reserve stable `v1.2.1` for parity
+   - [x] keep the current non-parity npm package at `0.1.0`
 6. [ ] Detach the GitHub fork and promote `typescript` as the primary branch
    - [x] break the current fork relationship on GitHub
    - [x] switch the default branch from `master` to `typescript`
 7. [ ] Re-run CI on the release-shaped branch tip and publish
    - [x] expand GitHub Actions triggers to include `typescript`
    - [x] verify GitHub Actions on the detached `typescript` branch
-   - [ ] tag `v1.2.1`
-   - [ ] publish the npm package
-8. [ ] Start post-release parity implementation for deferred options
+   - [x] decide not to tag/publish stable `v1.2.1` before parity
+   - [ ] optionally publish a `0.x` preview under a non-default npm dist tag
+8. [ ] Start pre-stable parity implementation for deferred options
    - [ ] implement `wordTimestamps`
    - [ ] implement `clipTimestamps`
    - [ ] implement `hallucinationSilenceThreshold`
@@ -323,23 +326,25 @@ Plan:
   - [ ] keep `master` only as a temporary transition branch or remove it after the switch
 - [x] Define the version mapping explicitly
   - [x] `python-origin` => frozen Python-compatible baseline `1.2.1`
-  - [x] `typescript` => detached npm-only line starting at `1.2.1`
-  - [x] do not publish a detached `0.x` version line
+  - [x] `typescript` => detached npm-only line at `0.1.0` until parity is reached
+  - [x] stable `v1.2.1` => reserved for full parity with the Python `1.2.1` baseline
+  - [x] do not publish a stable detached `1.2.x` version before parity
 - [ ] Re-run release validation on the detached line
   - [x] expand GitHub Actions triggers to include `typescript`
   - [x] push `typescript`
   - [x] verify GitHub Actions on the detached repository
   - [x] add `workflow_dispatch` as an explicit CI recovery path on the detached repo
-  - [ ] tag `v1.2.1`
-  - [ ] publish the npm package
+  - [x] defer `v1.2.1` tag until parity
+  - [ ] optionally publish a `0.x` preview under `next`
 
-## Lot 9 - Post-Release Parity Implementation
+## Lot 9 - Pre-Stable Parity Implementation
 
-Goal: publish `v1.2.1` with explicit limitations, then continue the TypeScript port until the currently deferred transcription options and parity gaps are closed.
+Goal: do not publish or tag stable `v1.2.1` until the currently deferred transcription options and parity gaps are closed.
 
-Release posture for `v1.2.1`:
+Current release posture:
 
-- [x] publish only with explicit limitation notes in `README.md`
+- [x] keep the npm package on `0.1.0` while parity is incomplete
+- [x] reserve stable `v1.2.1` for parity with upstream Python `1.2.1`
 - [x] keep the supported target scoped to the currently validated Node.js/Linux CPU path
 - [x] treat unsupported transcription options as explicit follow-up work, not hidden parity claims
 
@@ -379,6 +384,6 @@ Post-release implementation plan:
 - [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
 - [x] `python-origin` preserves the last Python baseline
 - [x] `typescript` becomes the default branch after fork detach
-- [ ] The first detached TypeScript release is tagged and published as `v1.2.1`
+- [ ] Stable `v1.2.1` is tagged and published only after parity is implemented and validated
 - [ ] Deferred transcription options are implemented or remain explicitly documented as limitations
 - [x] `git status --short` is clean at the end of the cut-over
