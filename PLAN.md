@@ -2,15 +2,20 @@
 
 ## Snapshot
 
-- [x] Confirm current upstream baseline branch: `master`
-- [x] Confirm current upstream baseline commit: `ed9a06c` (`origin/master`)
+- [x] Confirm historical upstream Python baseline branch: `master`
+- [x] Confirm historical upstream Python baseline commit: `ed9a06c`
+- [x] Confirm historical upstream Python baseline version: `1.2.1`
 - [x] Confirm the historical migration workspace: `ts/`
 - [x] Inspect `../graphify` as the reference model for a root-level npm-only package
+- [x] Confirm the GitHub repository is still a fork of `SYSTRAN/faster-whisper`
 - [x] Verify current validation evidence for the root-level npm package:
   - [x] `npm run build`
   - [x] `npm test`
   - [x] `NPM_CONFIG_CACHE=/tmp/faster-whisper-npm-cache npm run pack:check`
 - [x] Add and validate a pristine tarball install smoke test
+- [x] Verify GitHub Actions on the migrated repository
+  - [x] `TypeScript CI` is active on GitHub
+  - [x] run `24485316095` succeeded on `master`
 - [x] Verify whether everything has been committed
 - [x] Working tree is fully committed
   - Current result: `git status --short --branch` is clean after the final leftover-cleanup commit
@@ -20,6 +25,11 @@
   - Current result: `ts/`, `faster_whisper/`, `benchmark/`, and `docker/` were removed locally after the root cut-over
   - Current result: `graphify-out/` is intentionally kept as a local ignored output directory
   - Current result: pristine tarball install and fresh-clone `npm ci` / `npm run build` now pass in `/tmp/faster-whisper-release-check`
+- [x] Establish continuity branches before detaching the fork
+  - [x] `python-origin` points to `ed9a06c`
+  - [x] `typescript` points to the npm-only branch tip
+- [x] Align the first detached TypeScript release target with the Python baseline version
+  - [x] npm package version target is `1.2.1`
 
 ## Guardrails
 
@@ -32,6 +42,8 @@
 - [x] Create a first explicit checkpoint commit for the current TypeScript migration before destructive moves
 - [x] Do not delete Python files until the root-level npm package builds and tests successfully from repo root
 - [x] Eliminate all hard-coded absolute local paths before calling the package releasable
+- [x] Keep `python-origin` as the frozen Python continuity branch until an explicit realignment plan exists
+- [x] Do not publish a new detached TypeScript release on a `0.x` line when the parity baseline is Python `1.2.1`
 
 ## Remaining Order
 
@@ -51,7 +63,17 @@
 4. [x] Finish documentation parity for the npm-only port
    - [x] expand the README section coverage
    - [x] add release and publishing notes
-5. [ ] Commit the cut-over in ordered chunks and end on a clean `git status`
+5. [x] Establish the branch and version mapping for the detached TypeScript line
+   - [x] create `python-origin`
+   - [x] create `typescript`
+   - [x] align the first TypeScript release target to `1.2.1`
+6. [ ] Detach the GitHub fork and promote `typescript` as the primary branch
+   - [ ] break the current fork relationship on GitHub
+   - [ ] switch the default branch from `master` to `typescript`
+7. [ ] Re-run CI on the release-shaped branch tip and publish
+   - [ ] verify GitHub Actions on `typescript`
+   - [ ] tag `v1.2.1`
+   - [ ] publish the npm package
 
 ## Lot 0 - Commit Hygiene And Baseline
 
@@ -60,6 +82,7 @@ Plan:
 - [x] Confirm whether the migration work is already committed
 - [x] Confirm the `../graphify` reference model for package structure
 - [ ] Create a dedicated migration branch for the cut-over if needed
+- [x] Create the continuity branches needed for release and detach
 - [x] Commit the current `ts/` migration tree as a safety checkpoint before the root move
 - [x] Decide whether `.codex` should be ignored or removed so the worktree can become clean
 
@@ -81,7 +104,9 @@ Pending commit chunks:
 - [x] `docs: expand README parity coverage` (`639b361`)
 - [x] `docs: note fresh install network requirements` (`7757fdd`)
 - [x] `chore: switch node audio decoding to system ffmpeg` (`4bfb62d`)
-- [ ] `ci: add pristine tarball install smoke test`
+- [x] `ci: add pristine tarball install smoke test` (`511035c`)
+- [x] `ci: trigger github actions` (`33ef220`)
+- [x] `ci: install ffmpeg on github actions` (`3145eff`)
 
 ## Lot 1 - Phase 1 Recap: C/C++ Bridge (`whisper_bridge`)
 
@@ -259,6 +284,35 @@ Plan:
   - [x] release/build instructions
   - [x] package publishing notes
 
+## Lot 8 - Fork Detach, Branch Topology, And Version Mapping
+
+Goal: preserve the last Python state as a reference branch, promote the npm-only TypeScript port as the main line after fork detachment, and keep the first detached release version aligned with the upstream Python baseline.
+
+Plan:
+- [x] Confirm the current GitHub repository is still a fork of `SYSTRAN/faster-whisper`
+- [ ] Detach the GitHub fork relationship
+  - [ ] use the GitHub-supported detach flow if available
+  - [ ] otherwise delete and recreate the repository while preserving branches/tags
+- [x] Preserve the Python baseline as a continuity branch
+  - [x] create `python-origin`
+  - [x] pin it to `ed9a06c`
+  - [x] record that this branch corresponds to upstream Python `1.2.1`
+- [x] Preserve the TypeScript release line as a dedicated branch
+  - [x] create `typescript`
+  - [x] point it at the current npm-only release candidate
+- [ ] Promote the TypeScript line after detach
+  - [ ] switch the default branch to `typescript`
+  - [ ] keep `master` only as a temporary transition branch or remove it after the switch
+- [x] Define the version mapping explicitly
+  - [x] `python-origin` => frozen Python-compatible baseline `1.2.1`
+  - [x] `typescript` => detached npm-only line starting at `1.2.1`
+  - [x] do not publish a detached `0.x` version line
+- [ ] Re-run release validation on the detached line
+  - [ ] push `typescript`
+  - [ ] verify GitHub Actions on `typescript`
+  - [ ] tag `v1.2.1`
+  - [ ] publish the npm package
+
 ## Exit Criteria
 
 - [x] The current TypeScript migration work is committed
@@ -266,8 +320,12 @@ Plan:
 - [x] The nested `ts/` package no longer exists on disk
 - [x] Python package and Python packaging files are removed from the repository
 - [x] Root `npm install`, `npm run build`, `npm test`, and `npm pack` succeed
+- [x] GitHub Actions passes on the migrated repository
 - [x] Runtime code no longer depends on repo-local absolute paths
 - [x] The root `README.md` documents the npm package, not the old Python package
 - [x] The project remains under a permissive free license
 - [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
+- [x] `python-origin` preserves the last Python baseline
+- [ ] `typescript` becomes the default branch after fork detach
+- [ ] The first detached TypeScript release is tagged and published as `v1.2.1`
 - [x] `git status --short` is clean at the end of the cut-over

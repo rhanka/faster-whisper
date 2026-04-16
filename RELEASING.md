@@ -19,6 +19,7 @@ Fresh installs still require network access for `onnxruntime-node`. Audio decodi
 
 1. Work from a clean branch tip.
 2. Update `package.json` version.
+   The first detached TypeScript release should stay aligned with the upstream Python baseline at `1.2.1`.
 3. Validate the package from the repository root:
 
 ```bash
@@ -44,6 +45,13 @@ rm faster-whisper-ts-*.tgz
 
 ```bash
 npm publish
+```
+
+6. Tag the detached TypeScript release from the `typescript` branch:
+
+```bash
+git tag v1.2.1
+git push origin v1.2.1
 ```
 
 ## Publish Notes
