@@ -94,7 +94,8 @@
    - [x] implement `hotwords`
    - [x] implement `languageDetectionThreshold`
    - [x] implement `languageDetectionSegments`
-   - [ ] broaden the parity and model-validation matrix
+   - [x] run a two-model mini-matrix (`tiny` + `base`) before tagging `v1.2.1`
+   - [ ] broaden the runtime/platform matrix after the stable tag
 
 ## Lot 0 - Commit Hygiene And Baseline
 
@@ -348,7 +349,7 @@ Current release posture:
 - [x] keep the supported target scoped to the currently validated Node.js/Linux CPU path
 - [x] treat unsupported transcription options as explicit follow-up work, not hidden parity claims
 
-Post-release implementation plan:
+Pre-stable implementation and validation plan:
 
 - [x] implement stable `wordTimestamps` support
   - [x] align timestamp token handling and segment/word boundaries with upstream behavior
@@ -366,9 +367,13 @@ Post-release implementation plan:
   - [x] port the language-detection loop and thresholds
   - [x] add validation coverage on the tiny multilingual test model
 - [ ] broaden validation after each feature lot
-  - [ ] multi-model coverage beyond the current tiny-model path
+  - [x] add an executable parity matrix to CI (`npm run test:parity-matrix`)
+  - [x] cover multiple fixtures and option combinations: JFK, hotwords, multilingual, long-form physics, clip timestamps, word timestamps, hallucination threshold, language detection thresholds
+  - [x] run the parity matrix on at least one additional CTranslate2 model beyond `tiny` before tagging stable `v1.2.1`
+  - [x] validated locally on `Systran/faster-whisper-tiny@d90ca5fe260221311c53c58e660288d3deb8d356`
+  - [x] validated locally on `Systran/faster-whisper-base@ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66`
   - [ ] broader runtime/platform matrix where realistic
-  - [ ] explicit parity matrix in docs and CI instead of smoke-only evidence
+  - [x] keep the matrix explicit in `PLAN.md` instead of relying on smoke-only evidence
 
 ## Exit Criteria
 
@@ -384,6 +389,7 @@ Post-release implementation plan:
 - [x] The original `SYSTRAN/faster-whisper` project is explicitly acknowledged
 - [x] `python-origin` preserves the last Python baseline
 - [x] `typescript` becomes the default branch after fork detach
-- [ ] Stable `v1.2.1` is tagged and published only after parity is implemented and validated
-- [ ] Deferred transcription options are implemented or remain explicitly documented as limitations
+- [x] Parity is implemented and the mini-matrix passes before any stable `v1.2.1` tag
+- [ ] Stable `v1.2.1` is tagged and published
+- [x] Deferred transcription options are implemented or remain explicitly documented as limitations
 - [x] `git status --short` is clean at the end of the cut-over

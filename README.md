@@ -20,8 +20,8 @@ Thanks to the original `faster-whisper` project for the implementation direction
 - Transcription timestamp splitting, VAD timestamp restoration, word timestamps, clip timestamps, hotwords, hallucination silence skipping, and language-detection thresholds now follow the upstream logic instead of the earlier POC shortcuts.
 - Some parity work is still pending before claiming full upstream coverage:
   - full benchmark matrix
-  - broader model/runtime validation
-  - explicit option-by-option validation beyond the current regression fixtures
+  - broader runtime/platform validation beyond the current Linux CPU path
+  - larger model matrix beyond the current `tiny` + `base` pre-stable run
 
 ## Requirements
 
@@ -109,7 +109,7 @@ Validated in the current smoke path:
 Still pending before claiming a broad stable parity release:
 
 - broader multilingual/runtime validation beyond the current smoke path
-- multi-model validation beyond the tiny test model
+- wider model validation beyond the current `tiny` + `base` pre-stable run
 - benchmark parity and performance documentation
 
 ## Current Limitations Before Stable `v1.2.1`
@@ -201,8 +201,16 @@ Useful root-level commands:
 npm run build
 npm run lint
 npm test
+npm run test:parity-matrix
 npm run test:pristine-install
 npm run pack:check
+```
+
+`npm run test:parity-matrix` runs the pre-stable parity matrix. By default it uses the local tiny CTranslate2 test model. For the stable parity gate, run it with at least `tiny` and `base`:
+
+```bash
+FASTER_WHISPER_PARITY_MODELS="tiny=/path/to/tiny,base=/path/to/base" npm run build:ts
+FASTER_WHISPER_PARITY_MODELS="tiny=/path/to/tiny,base=/path/to/base" npm run test:parity-matrix
 ```
 
 `npm run pack:check` verifies the publishable tarball from the repo root. The published package is intended to contain only the compiled JS, assets, build scripts, vendored native inputs, and license/readme files required at install time.
