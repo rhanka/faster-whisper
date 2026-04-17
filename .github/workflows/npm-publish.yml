@@ -115,7 +115,10 @@ jobs:
 
       - name: Publish to npm
         if: steps.npm.outputs.exists == 'false'
-        run: npm publish --access public
+        run: |
+          printf "registry=https://registry.npmjs.org/\n" > "$RUNNER_TEMP/npm-trusted-publish.npmrc"
+          unset NODE_AUTH_TOKEN
+          NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npm-trusted-publish.npmrc" npm publish --access public
 
       - name: Ensure release tag exists
         if: steps.npm.outputs.exists == 'false'
