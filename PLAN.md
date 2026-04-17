@@ -31,10 +31,10 @@
   - [x] `python-origin` points to `ed9a06c`
   - [x] `typescript` points to the npm-only branch tip
 - [x] Do not publish the detached TypeScript line as stable `1.2.1` until parity is implemented and validated
-  - [x] npm package version reset to `0.1.0` for the current non-parity line
-  - [x] stable `v1.2.1` is reserved for the future parity-grade release
-- [x] Document the current npm line as a limited parity line
-  - [x] README explicitly lists the supported scope and deferred options before stable `v1.2.1`
+  - [x] npm package version was kept at `0.1.0` for the non-parity line
+  - [x] npm package version is bumped to `1.2.1` after the parity matrix passed
+- [x] Document the current npm line as a scoped stable parity line
+  - [x] README explicitly lists the supported scope and remaining runtime/platform limits for stable `v1.2.1`
   - [x] parity implementation work is tracked below instead of being implied away
 - [x] Detach the GitHub repository from the upstream fork network
   - [x] backup mirror created in `/tmp/faster-whisper.detach-backup.git`
@@ -67,10 +67,10 @@
    - [x] remove the Python-only `benchmark/` surface from the npm-only repository
    - [x] remove the Python-only `docker/` surface from the npm-only repository
    - [x] decide whether prebuilt native binaries are deferred or planned
-3. [ ] Stabilize the transcription layer beyond the current smoke proof
+3. [x] Stabilize the transcription layer beyond the current smoke proof
    - [x] review and replace the remaining simplified/POC logic in `src/transcribe.ts`
    - [x] align the code and tests with the newly documented supported/deferred option surface
-   - [ ] broaden model coverage beyond the single tiny-model smoke path
+   - [x] broaden model coverage beyond the single tiny-model smoke path
 4. [x] Finish documentation parity for the npm-only port
    - [x] expand the README section coverage
    - [x] add release and publishing notes
@@ -78,7 +78,7 @@
    - [x] create `python-origin`
    - [x] create `typescript`
    - [x] reserve stable `v1.2.1` for parity
-   - [x] keep the current non-parity npm package at `0.1.0`
+   - [x] bump the stable parity npm package to `1.2.1`
 6. [ ] Detach the GitHub fork and promote `typescript` as the primary branch
    - [x] break the current fork relationship on GitHub
    - [x] switch the default branch from `master` to `typescript`
@@ -86,7 +86,8 @@
    - [x] expand GitHub Actions triggers to include `typescript`
    - [x] verify GitHub Actions on the detached `typescript` branch
    - [x] decide not to tag/publish stable `v1.2.1` before parity
-   - [ ] optionally publish a `0.x` preview under a non-default npm dist tag
+   - [ ] tag stable `v1.2.1`
+   - [ ] publish stable `1.2.1` to npm
 8. [ ] Start pre-stable parity implementation for deferred options
    - [x] implement `wordTimestamps`
    - [x] implement `clipTimestamps`
@@ -327,8 +328,8 @@ Plan:
   - [ ] keep `master` only as a temporary transition branch or remove it after the switch
 - [x] Define the version mapping explicitly
   - [x] `python-origin` => frozen Python-compatible baseline `1.2.1`
-  - [x] `typescript` => detached npm-only line at `0.1.0` until parity is reached
-  - [x] stable `v1.2.1` => reserved for full parity with the Python `1.2.1` baseline
+  - [x] `typescript` => detached npm-only line at `1.2.1` after parity is reached
+  - [x] stable `v1.2.1` => scoped parity with the Python `1.2.1` baseline on Node.js/Linux CPU
   - [x] do not publish a stable detached `1.2.x` version before parity
 - [ ] Re-run release validation on the detached line
   - [x] expand GitHub Actions triggers to include `typescript`
@@ -336,7 +337,8 @@ Plan:
   - [x] verify GitHub Actions on the detached repository
   - [x] add `workflow_dispatch` as an explicit CI recovery path on the detached repo
   - [x] defer `v1.2.1` tag until parity
-  - [ ] optionally publish a `0.x` preview under `next`
+  - [ ] tag stable `v1.2.1`
+  - [ ] publish stable `1.2.1` to npm
 
 ## Lot 9 - Pre-Stable Parity Implementation
 
@@ -345,7 +347,7 @@ Goal: do not publish or tag stable `v1.2.1` until the currently deferred transcr
 Current release posture:
 
 - [x] keep the npm package on `0.1.0` while parity is incomplete
-- [x] reserve stable `v1.2.1` for parity with upstream Python `1.2.1`
+- [x] bump the npm package to `1.2.1` after parity with upstream Python `1.2.1` is validated on the supported target
 - [x] keep the supported target scoped to the currently validated Node.js/Linux CPU path
 - [x] treat unsupported transcription options as explicit follow-up work, not hidden parity claims
 

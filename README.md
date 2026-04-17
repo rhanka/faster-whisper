@@ -8,8 +8,8 @@ Thanks to the original `faster-whisper` project for the implementation direction
 
 - Root package is now npm-only.
 - Native bridge build works from repo root.
-- Current npm package version is `0.1.0` because full parity with upstream Python `faster-whisper` `1.2.1` is not demonstrated yet.
-- Stable `v1.2.1` is reserved for a future parity-grade release.
+- Current npm package version is `1.2.1`, aligned with the upstream Python `faster-whisper` `1.2.1` baseline for the supported Node.js/Linux CPU target.
+- The stable gate is backed by the parity matrix documented below, including local `tiny` + `base` CTranslate2 model runs.
 - Current smoke coverage passes on:
   - bridge load/free
   - audio decoding
@@ -18,7 +18,7 @@ Thanks to the original `faster-whisper` project for the implementation direction
   - VAD
   - end-to-end transcription on `tests/data/jfk.flac`
 - Transcription timestamp splitting, VAD timestamp restoration, word timestamps, clip timestamps, hotwords, hallucination silence skipping, and language-detection thresholds now follow the upstream logic instead of the earlier POC shortcuts.
-- Some parity work is still pending before claiming full upstream coverage:
+- Some broader validation remains intentionally outside the current stable scope:
   - full benchmark matrix
   - broader runtime/platform validation beyond the current Linux CPU path
   - larger model matrix beyond the current `tiny` + `base` pre-stable run
@@ -106,15 +106,15 @@ Validated in the current smoke path:
 - `languageDetectionSegments`
 - root-level native bridge loading and teardown
 
-Still pending before claiming a broad stable parity release:
+Still pending beyond this scoped stable release:
 
 - broader multilingual/runtime validation beyond the current smoke path
 - wider model validation beyond the current `tiny` + `base` pre-stable run
 - benchmark parity and performance documentation
 
-## Current Limitations Before Stable `v1.2.1`
+## Current Stable Scope And Limitations
 
-The current npm line is intentionally scoped. It is validated for the current Node.js/Linux CPU path, but broader platform/model parity still needs a larger matrix before tagging a stable `v1.2.1` release.
+The current npm line is intentionally scoped. It is validated for the current Node.js/Linux CPU path with a pre-stable `tiny` + `base` CTranslate2 model matrix; broader platform/model parity can still be expanded after this stable release.
 
 Documented release limitations:
 
