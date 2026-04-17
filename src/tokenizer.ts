@@ -97,4 +97,96 @@ export class Tokenizer {
             return this.tokenizer.decode(s, { skip_special_tokens: false });
         }).join('');
     }
+
+    public get nonSpeechTokens(): number[] {
+        const symbols = Array.from('"#()*+/:;<=>@[\\]^_`{|}~「」『』');
+        symbols.push(..."<< >> <<< >>> -- --- -( -[ (' (\" (( )) ((( ))) [[ ]] {{ }} ♪♪ ♪♪♪".split(' '));
+
+        const miscellaneous = new Set(Array.from('♩♪♫♬♭♮♯'));
+        const result = new Set<number>();
+
+        const dash = this.encode(' -')[0];
+        const apostrophe = this.encode(" '")[0];
+        if (dash !== undefined) result.add(dash);
+        if (apostrophe !== undefined) result.add(apostrophe);
+
+        for (const symbol of [...symbols, ...miscellaneous]) {
+            for (const text of [symbol, ` ${symbol}`]) {
+                const tokens = this.encode(text);
+                if (tokens.length === 1 || miscellaneous.has(symbol)) {
+                    const token = tokens[0];
+                    if (token !== undefined) result.add(token);
+                }
+            }
+        }
+
+        return Array.from(result).sort((a, b) => a - b);
+    }
+
+    public splitToWordTokens(tokens: number[]): [string[], number[][]] {
+        if (["zh", "ja", "th", "lo", "my", "yue"].includes(this.languageCode)) {
+            return this.splitTokensOnUnicode(tokens);
+        }
+
+        return this.splitTokensOnSpaces(tokens);
+    }
+
+    private splitTokensOnUnicode(tokens: number[]): [string[], number[][]] {
+        const decodedFull = this.decodeWithTimestamps(tokens);
+        const replacementChar = '\ufffd';
+        const words: string[] = [];
+        const wordTokens: number[][] = [];
+        let currentTokens: number[] = [];
+        let unicodeOffset = 0;
+
+        for (const token of tokens) {
+            currentTokens.push(token);
+            const decoded = this.decodeWithTimestamps(currentTokens);
+            const replacementCharIndex = decoded.indexOf(replacementChar);
+            const absoluteReplacementIndex = replacementCharIndex === -1
+                ? -1
+                : replacementCharIndex + unicodeOffset;
+
+            if (
+                absoluteReplacementIndex === -1
+                || (
+                    absoluteReplacementIndex < decodedFull.length
+                    && decodedFull[absoluteReplacementIndex] === replacementChar
+                )
+            ) {
+                words.push(decoded);
+                wordTokens.push(currentTokens);
+                currentTokens = [];
+                unicodeOffset += decoded.length;
+            }
+        }
+
+        return [words, wordTokens];
+    }
+
+    private splitTokensOnSpaces(tokens: number[]): [string[], number[][]] {
+        const [subwords, subwordTokensList] = this.splitTokensOnUnicode(tokens);
+        const words: string[] = [];
+        const wordTokens: number[][] = [];
+
+        for (let i = 0; i < subwords.length; i++) {
+            const subword = subwords[i]!;
+            const subwordTokens = subwordTokensList[i]!;
+            const special = (subwordTokens[0] ?? 0) >= (this.eot ?? Number.MAX_SAFE_INTEGER);
+            const withSpace = subword.startsWith(' ');
+            const punctuation = subword.trim().length === 1 && punctuationChars.has(subword.trim());
+
+            if (special || withSpace || punctuation || words.length === 0) {
+                words.push(subword);
+                wordTokens.push([...subwordTokens]);
+            } else {
+                words[words.length - 1] += subword;
+                wordTokens[wordTokens.length - 1]!.push(...subwordTokens);
+            }
+        }
+
+        return [words, wordTokens];
+    }
 }
+
+const punctuationChars = new Set(Array.from('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'));

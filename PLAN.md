@@ -88,12 +88,12 @@
    - [x] decide not to tag/publish stable `v1.2.1` before parity
    - [ ] optionally publish a `0.x` preview under a non-default npm dist tag
 8. [ ] Start pre-stable parity implementation for deferred options
-   - [ ] implement `wordTimestamps`
-   - [ ] implement `clipTimestamps`
-   - [ ] implement `hallucinationSilenceThreshold`
-   - [ ] implement `hotwords`
-   - [ ] implement `languageDetectionThreshold`
-   - [ ] implement `languageDetectionSegments`
+   - [x] implement `wordTimestamps`
+   - [x] implement `clipTimestamps`
+   - [x] implement `hallucinationSilenceThreshold`
+   - [x] implement `hotwords`
+   - [x] implement `languageDetectionThreshold`
+   - [x] implement `languageDetectionSegments`
    - [ ] broaden the parity and model-validation matrix
 
 ## Lot 0 - Commit Hygiene And Baseline
@@ -212,12 +212,12 @@ Carry-over hardening:
   - [x] replace the simplified timestamp split logic in `src/transcribe.ts`
   - [x] replace the simplified seek advancement logic in `src/transcribe.ts`
 - [x] Decide which features are fully supported at cut-over time versus explicitly deferred
-  - [x] `wordTimestamps` is explicitly deferred
-  - [x] `clipTimestamps` is explicitly deferred
-  - [x] `hallucinationSilenceThreshold` is explicitly deferred
-  - [x] `hotwords` is explicitly deferred
-  - [x] `languageDetectionThreshold` / `languageDetectionSegments` are explicitly deferred
-- [x] Reject deferred transcription options explicitly in code and tests
+  - [x] `wordTimestamps` moved from deferred to implemented
+  - [x] `clipTimestamps` moved from deferred to implemented
+  - [x] `hallucinationSilenceThreshold` moved from deferred to implemented
+  - [x] `hotwords` moved from deferred to implemented
+  - [x] `languageDetectionThreshold` / `languageDetectionSegments` moved from deferred to implemented
+- [x] Replace deferred-option rejection with runtime parity coverage in code and tests
 
 ## Lot 6 - Root-Level npm Package Finalization
 
@@ -350,21 +350,21 @@ Current release posture:
 
 Post-release implementation plan:
 
-- [ ] implement stable `wordTimestamps` support
-  - [ ] align timestamp token handling and segment/word boundaries with upstream behavior
-  - [ ] add regression tests beyond the current JFK smoke
-- [ ] implement `clipTimestamps`
-  - [ ] match seek/window semantics with upstream behavior
-  - [ ] add API and regression coverage
-- [ ] implement `hallucinationSilenceThreshold`
-  - [ ] port the threshold behavior from the Python logic
-  - [ ] validate against representative silence-heavy fixtures
-- [ ] implement `hotwords`
-  - [ ] define the prompt wiring and tokenizer behavior in TypeScript
-  - [ ] add targeted prompt-conditioning tests
-- [ ] implement `languageDetectionThreshold` and `languageDetectionSegments`
-  - [ ] port the language-detection loop and thresholds
-  - [ ] add multilingual validation fixtures
+- [x] implement stable `wordTimestamps` support
+  - [x] align timestamp token handling and segment/word boundaries with upstream behavior
+  - [x] add regression tests beyond the original JFK smoke
+- [x] implement `clipTimestamps`
+  - [x] match seek/window semantics with upstream behavior
+  - [x] add API and regression coverage
+- [x] implement `hallucinationSilenceThreshold`
+  - [x] port the threshold behavior from the Python logic
+  - [x] cover the option together with word timestamps
+- [x] implement `hotwords`
+  - [x] define the prompt wiring and tokenizer behavior in TypeScript
+  - [x] add targeted prompt-conditioning tests
+- [x] implement `languageDetectionThreshold` and `languageDetectionSegments`
+  - [x] port the language-detection loop and thresholds
+  - [x] add validation coverage on the tiny multilingual test model
 - [ ] broaden validation after each feature lot
   - [ ] multi-model coverage beyond the current tiny-model path
   - [ ] broader runtime/platform matrix where realistic

@@ -8,12 +8,16 @@ async function testSmokeTranscription(model: WhisperModel, audioPath: string) {
     const [segments, info] = await model.transcribe(audioPath, {
         beamSize: 5,
         vadFilter: true,
+        languageDetectionThreshold: 0.5,
+        languageDetectionSegments: 2,
     });
 
     assert.ok(segments.length > 0, 'expected at least one segment');
     assert.ok(info.duration > 0, 'expected audio duration');
     assert.ok(info.duration_after_vad > 0, 'expected non-zero post-VAD duration');
     assert.ok(info.duration_after_vad <= info.duration, 'expected VAD duration to be bounded by original duration');
+    assert.equal(info.language, 'en', 'expected language detection to identify English');
+    assert.ok(info.all_language_probs && info.all_language_probs.length > 0, 'expected language probabilities');
 
     const transcript = segments.map((segment) => segment.text).join(' ').toLowerCase();
     assert.match(
@@ -82,18 +86,45 @@ async function testTimestampSplitHelper(model: WhisperModel) {
     assert.equal(nextSeek, 140, 'expected seek to advance to the last timestamp position');
 }
 
-async function testDeferredOptionsAreRejected(model: WhisperModel, audioPath: string) {
-    await assert.rejects(
-        () => model.transcribe(audioPath, {
-            wordTimestamps: true,
-            clipTimestamps: [0, 1],
-            hallucinationSilenceThreshold: 1.0,
-            hotwords: 'country',
-            languageDetectionThreshold: 0.5,
-            languageDetectionSegments: 2,
-        }),
-        /wordTimestamps, clipTimestamps, hallucinationSilenceThreshold, hotwords, languageDetectionThreshold, languageDetectionSegments/
-    );
+async function testWordTimestampOptions(model: WhisperModel, audioPath: string) {
+    const [segments] = await model.transcribe(audioPath, {
+        beamSize: 5,
+        wordTimestamps: true,
+        hallucinationSilenceThreshold: 1.0,
+    }, 'en');
+
+    assert.ok(segments.length > 0, 'expected word timestamp segments');
+    const words = segments[0]!.words;
+    assert.ok(words && words.length > 0, 'expected word-level timestamps');
+    assert.equal(segments[0]!.start, words[0]!.start, 'expected segment start to follow first word');
+    assert.equal(segments[0]!.end, words[words.length - 1]!.end, 'expected segment end to follow last word');
+    assert.match(words.map((word) => word.word).join(''), /country/, 'expected aligned words to include transcript text');
+}
+
+async function testClipTimestamps(model: WhisperModel, audioPath: string) {
+    const audio = await decodeAudio(audioPath) as Float32Array;
+    const duplicatedAudio = new Float32Array(audio.length * 2);
+    duplicatedAudio.set(audio);
+    duplicatedAudio.set(audio, audio.length);
+
+    const [segments, info] = await model.transcribe(duplicatedAudio, {
+        beamSize: 5,
+        clipTimestamps: [0, 11, 11, 22],
+    }, 'en');
+
+    assert.ok(segments.length >= 2, 'expected one segment per requested clip');
+    assert.ok(segments.some((segment) => segment.start >= 10.8), 'expected second clip timestamps to be preserved');
+    assert.equal(info.duration_after_vad, info.duration, 'expected explicit clips to bypass VAD remapping');
+}
+
+async function testHotwords(model: WhisperModel) {
+    const [segments] = await model.transcribe(getTestAssetPath('hotwords.mp3'), {
+        beamSize: 5,
+        hotwords: 'ComfyUI',
+    }, 'en');
+
+    const transcript = segments.map((segment) => segment.text).join(' ');
+    assert.match(transcript, /ComfyUI/, 'expected hotword prompt to bias the transcript');
 }
 
 async function testTranscribe() {
@@ -105,7 +136,9 @@ async function testTranscribe() {
         await testSmokeTranscription(model, audioPath);
         await testVadTimestampRestore(model, audioPath);
         await testTimestampSplitHelper(model);
-        await testDeferredOptionsAreRejected(model, audioPath);
+        await testWordTimestampOptions(model, audioPath);
+        await testClipTimestamps(model, audioPath);
+        await testHotwords(model);
         console.log('Transcription tests passed.');
     } finally {
         model.free();
