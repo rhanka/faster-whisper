@@ -88,7 +88,7 @@
    - [x] decide not to tag/publish stable `v1.2.1` before parity
    - [x] tag stable `v1.2.1`
    - [x] add automatic npm publishing after a successful `TypeScript CI` run on the `typescript` branch
-   - [ ] publish stable `1.2.1` to npm
+   - [x] publish stable `1.2.1` to npm
 8. [ ] Start pre-stable parity implementation for deferred options
    - [x] implement `wordTimestamps`
    - [x] implement `clipTimestamps`
@@ -340,7 +340,7 @@ Plan:
   - [x] defer `v1.2.1` tag until parity
   - [x] tag stable `v1.2.1`
   - [x] add a post-CI npm publish workflow for merges into `typescript`
-  - [ ] publish stable `1.2.1` to npm
+  - [x] publish stable `1.2.1` to npm
 
 ## Lot 10 - Post-Merge npm Publishing
 
@@ -363,8 +363,11 @@ Plan:
   - repository: `faster-whisper`
   - workflow filename: `npm-publish.yml`
   - environment: leave empty unless a GitHub deployment environment is added
+  - current blocker: npm requires a fresh 2FA/OTP confirmation; CLI web polling did not complete after two validated URLs
 - [x] Verify repository-side OIDC on automatic publish run `24587992393`
-- [ ] Verify the first successful npm publish run for `faster-whisper-ts@1.2.1`
+- [x] Verify first npm publish for `faster-whisper-ts@1.2.1`
+  - current result: one-time bootstrap publish succeeded locally as npm user `rhk`
+  - current result: `npm view faster-whisper-ts@1.2.1 version --json` returns `"1.2.1"`
 
 Branch-protection note:
 - [ ] Require `TypeScript CI` on pull requests into `typescript` in GitHub branch protection/rulesets so merges cannot bypass the same gate that precedes publishing.
@@ -422,6 +425,6 @@ Pre-stable implementation and validation plan:
 - [x] `typescript` becomes the default branch after fork detach
 - [x] Parity is implemented and the mini-matrix passes before any stable `v1.2.1` tag
 - [x] Stable `v1.2.1` is tagged
-- [ ] Stable `1.2.1` is published to npm
+- [x] Stable `1.2.1` is published to npm
 - [x] Deferred transcription options are implemented or remain explicitly documented as limitations
 - [x] `git status --short` is clean at the end of the cut-over
