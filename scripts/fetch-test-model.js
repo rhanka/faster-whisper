@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const MODEL_REVISION = 'd90ca5fe260221311c53c58e660288d3deb8d356';
-const MODEL_ID = 'Systran/faster-whisper-tiny';
+const DEFAULT_MODEL_REVISION = 'd90ca5fe260221311c53c58e660288d3deb8d356';
+const DEFAULT_MODEL_ID = 'Systran/faster-whisper-tiny';
 const MODEL_FILES = [
   'config.json',
   'model.bin',
@@ -14,9 +14,21 @@ function getRepoRoot() {
   return path.resolve(__dirname, '..');
 }
 
+function getModelId() {
+  return process.env.FASTER_WHISPER_TEST_MODEL_ID || DEFAULT_MODEL_ID;
+}
+
+function getModelRevision() {
+  return process.env.FASTER_WHISPER_TEST_MODEL_REVISION || DEFAULT_MODEL_REVISION;
+}
+
 function getTargetDir() {
   if (process.env.FASTER_WHISPER_TEST_MODEL) {
     return path.resolve(process.env.FASTER_WHISPER_TEST_MODEL);
+  }
+
+  if (process.env.FASTER_WHISPER_TEST_MODEL_DIR) {
+    return path.resolve(process.env.FASTER_WHISPER_TEST_MODEL_DIR);
   }
 
   return path.join(getRepoRoot(), 'test-models', 'faster-whisper-tiny');
@@ -26,8 +38,8 @@ function hasModelFiles(targetDir) {
   return MODEL_FILES.every((fileName) => fs.existsSync(path.join(targetDir, fileName)));
 }
 
-async function downloadFile(fileName, targetDir) {
-  const url = `https://huggingface.co/${MODEL_ID}/resolve/${MODEL_REVISION}/${fileName}`;
+async function downloadFile(fileName, targetDir, modelId, modelRevision) {
+  const url = `https://huggingface.co/${modelId}/resolve/${modelRevision}/${fileName}`;
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -39,6 +51,8 @@ async function downloadFile(fileName, targetDir) {
 }
 
 async function main() {
+  const modelId = getModelId();
+  const modelRevision = getModelRevision();
   const targetDir = getTargetDir();
 
   if (hasModelFiles(targetDir)) {
@@ -53,9 +67,9 @@ async function main() {
     '.cache',
     'huggingface',
     'hub',
-    `models--${MODEL_ID.replace('/', '--')}`,
+    `models--${modelId.replace('/', '--')}`,
     'snapshots',
-    MODEL_REVISION
+    modelRevision
   );
 
   if (hasModelFiles(huggingFaceCacheDir)) {
@@ -66,9 +80,9 @@ async function main() {
     return;
   }
 
-  console.log(`Downloading test model ${MODEL_ID}@${MODEL_REVISION} into ${targetDir}`);
+  console.log(`Downloading test model ${modelId}@${modelRevision} into ${targetDir}`);
   for (const fileName of MODEL_FILES) {
-    await downloadFile(fileName, targetDir);
+    await downloadFile(fileName, targetDir, modelId, modelRevision);
   }
 }
 
