@@ -368,6 +368,8 @@ Plan:
 - [x] Verify first npm publish for `faster-whisper-ts@1.2.1`
   - current result: one-time bootstrap publish succeeded locally as npm user `rhk`
   - current result: `npm view faster-whisper-ts@1.2.1 version --json` returns `"1.2.1"`
+- [x] Verify post-CI publish workflow is idempotent after publish
+  - current result: `npm Publish` run `24589045775` passed and skipped because `faster-whisper-ts@1.2.1` already exists
 
 Branch-protection note:
 - [ ] Require `TypeScript CI` on pull requests into `typescript` in GitHub branch protection/rulesets so merges cannot bypass the same gate that precedes publishing.
