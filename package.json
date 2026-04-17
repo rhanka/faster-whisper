@@ -1,6 +1,6 @@
 {
   "name": "faster-whisper-ts",
-  "version": "0.1.0",
+  "version": "1.2.1",
   "description": "TypeScript port of SYSTRAN/faster-whisper for Node.js, built on CTranslate2, Koffi, FFmpeg, and ONNX Runtime.",
   "type": "commonjs",
   "main": "./dist/src/index.js",

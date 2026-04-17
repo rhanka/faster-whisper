@@ -19,8 +19,8 @@ Fresh installs still require network access for `onnxruntime-node`. Audio decodi
 
 1. Work from a clean branch tip.
 2. Update `package.json` version.
-   Do not use stable `1.2.1` until the TypeScript port reaches parity with upstream Python `faster-whisper` `1.2.1`.
-   The current non-parity npm line stays on `0.1.0`.
+   Stable `1.2.1` is used only after the TypeScript port reaches parity with upstream Python `faster-whisper` `1.2.1` on the supported Node.js/Linux CPU target.
+   The required pre-stable parity gate is `npm test`, `npm run test:pristine-install`, and `npm run test:parity-matrix` on at least the `tiny` + `base` CTranslate2 models.
 3. Validate the package from the repository root:
 
 ```bash
@@ -28,6 +28,7 @@ npm ci
 npm run build
 npm run lint
 npm test
+FASTER_WHISPER_PARITY_MODELS="tiny=/path/to/tiny,base=/path/to/base" npm run test:parity-matrix
 npm run test:pristine-install
 npm run pack:check
 ```
@@ -67,5 +68,5 @@ git push origin v1.2.1
 
 - The published package is intentionally limited by the `files` whitelist in `package.json`.
 - The release currently vendors the native bridge sources, CTranslate2 headers, and Linux CPU shared-library inputs needed by `postinstall`.
-- Deferred features such as word timestamps, clip timestamp selection, and language-detection thresholds are documented in `README.md` and should not be advertised as stable until validated.
+- Word timestamps, clip timestamp selection, hotwords, hallucination silence skipping, and language-detection thresholds are part of the stable scoped Node.js/Linux CPU surface once the parity matrix has passed.
 - If the package surface changes, update `README.md`, `CONTRIBUTING.md`, and `PLAN.md` in the same commit series.
