@@ -17,12 +17,11 @@ Thanks to the original `faster-whisper` project for the implementation direction
   - feature extraction
   - VAD
   - end-to-end transcription on `tests/data/jfk.flac`
-- Transcription timestamp splitting and VAD timestamp restoration now follow the upstream logic instead of the earlier POC shortcuts.
-- Deferred transcription options now fail fast with explicit errors instead of being silently ignored.
+- Transcription timestamp splitting, VAD timestamp restoration, word timestamps, clip timestamps, hotwords, hallucination silence skipping, and language-detection thresholds now follow the upstream logic instead of the earlier POC shortcuts.
 - Some parity work is still pending before claiming full upstream coverage:
   - full benchmark matrix
   - broader model/runtime validation
-  - deferred transcription options listed below
+  - explicit option-by-option validation beyond the current regression fixtures
 
 ## Requirements
 
@@ -92,49 +91,54 @@ The exported surface currently includes:
 
 ## Current Option Status
 
-The current cut-over intentionally documents a narrower stable surface than upstream `faster-whisper`.
+The current TypeScript surface now covers the main transcription options needed for Python `1.2.1` parity on the supported Node.js/Linux CPU path.
 
 Validated in the current smoke path:
 
 - base transcription from a local audio file
 - `beamSize`
 - `vadFilter`
-- root-level native bridge loading and teardown
-
-Currently deferred until the TypeScript port is stabilized further:
-
-- stable word-timestamp parity
+- `wordTimestamps`
 - `clipTimestamps`
 - `hallucinationSilenceThreshold`
 - `hotwords`
 - `languageDetectionThreshold`
 - `languageDetectionSegments`
-- broader multilingual/runtime validation beyond the current smoke path
+- root-level native bridge loading and teardown
 
-When one of these deferred options is passed today, the TypeScript port throws an explicit error instead of silently accepting unsupported behavior.
+Still pending before claiming a broad stable parity release:
+
+- broader multilingual/runtime validation beyond the current smoke path
+- multi-model validation beyond the tiny test model
+- benchmark parity and performance documentation
 
 ## Current Limitations Before Stable `v1.2.1`
 
-The current npm line is intentionally scoped. It is validated for the current Node.js/Linux path, but it is **not** a 100% parity release with upstream Python `faster-whisper`.
+The current npm line is intentionally scoped. It is validated for the current Node.js/Linux CPU path, but broader platform/model parity still needs a larger matrix before tagging a stable `v1.2.1` release.
 
 Documented release limitations:
 
 - supported release target: Node.js 20+ on the current Linux CPU path
 - browser/WASM audio fallback is kept in code, but is not declared stable
 - GPU runtime variants and prebuilt native binaries are not part of this release
-- `wordTimestamps` is not implemented in the stable npm surface
-- `clipTimestamps` is not implemented
-- `hallucinationSilenceThreshold` is not implemented
-- `hotwords` is not implemented
-- `languageDetectionThreshold` is not implemented
-- `languageDetectionSegments` is not implemented
-- parity is demonstrated by smoke coverage and CI on the supported path, not by a full upstream option-by-option matrix
+- parity is demonstrated by smoke/regression coverage and CI on the supported path, not yet by a full upstream option-by-option matrix across models and platforms
 
-If you need one of the deferred options above today, this npm line is not the final parity target yet.
+If you need GPU, browser/WASM, prebuilt binaries, or benchmark-backed performance claims, this npm line is not the final parity target yet.
 
 ## Word Timestamps
 
-Word-level timestamp extraction is not yet part of the stable npm surface. Passing `wordTimestamps: true` currently throws an explicit error until the TypeScript port has parity-grade timestamp alignment and validation.
+Word-level timestamp extraction is supported through the native CTranslate2 alignment path:
+
+```ts
+const [segments] = await model.transcribe("audio.mp3", {
+  wordTimestamps: true,
+  hallucinationSilenceThreshold: 1.0,
+});
+
+for (const word of segments[0]?.words ?? []) {
+  console.log(word.start, word.end, word.word, word.probability);
+}
+```
 
 ## VAD
 
