@@ -1,0 +1,137 @@
+name: npm Publish
+
+on:
+  workflow_run:
+    workflows:
+      - TypeScript CI
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      ${{
+        (
+          github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'typescript'
+        ) ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          github.ref_name == 'typescript'
+        )
+      }}
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Upgrade npm for provenance publishing
+        run: |
+          npm install -g npm@11.6.2
+          node --version
+          npm --version
+
+      - name: Read package metadata
+        id: package
+        run: |
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const pkg = require("./package.json");
+          if (pkg.private) {
+            throw new Error("Refusing to publish a private package.");
+          }
+          console.log(`name=${pkg.name}`);
+          console.log(`version=${pkg.version}`);
+          console.log(`tag=v${pkg.version}`);
+          NODE
+
+      - name: Check whether this version is already published
+        id: npm
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          PACKAGE_VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          set +e
+          npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version >/tmp/npm-version 2>/tmp/npm-view-error
+          status=$?
+          set -e
+
+          if [ "$status" -eq 0 ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} is already published."
+            exit 0
+          fi
+
+          if grep -q "E404" /tmp/npm-view-error; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} is not published yet."
+            exit 0
+          fi
+
+          cat /tmp/npm-view-error
+          exit "$status"
+
+      - name: Skip already published version
+        if: steps.npm.outputs.exists == 'true'
+        run: echo "Nothing to publish."
+
+      - name: Check npm publish token
+        id: auth
+        if: steps.npm.outputs.exists == 'false'
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::NPM_TOKEN is not configured; skipping npm publish. Configure the repository secret and rerun this workflow from the typescript branch."
+            exit 0
+          fi
+
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
+        run: npm ci
+
+      - name: Install ffmpeg
+        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Publish to npm
+        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
+        run: npm publish --provenance --access public
+
+      - name: Ensure release tag exists
+        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
+        env:
+          RELEASE_TAG: ${{ steps.package.outputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "Tag ${RELEASE_TAG} already exists."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${RELEASE_TAG}" -m "Release ${RELEASE_TAG}"
+          git push origin "${RELEASE_TAG}"

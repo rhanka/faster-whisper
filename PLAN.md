@@ -86,7 +86,8 @@
    - [x] expand GitHub Actions triggers to include `typescript`
    - [x] verify GitHub Actions on the detached `typescript` branch
    - [x] decide not to tag/publish stable `v1.2.1` before parity
-   - [ ] tag stable `v1.2.1`
+   - [x] tag stable `v1.2.1`
+   - [x] add automatic npm publishing after a successful `TypeScript CI` run on the `typescript` branch
    - [ ] publish stable `1.2.1` to npm
 8. [ ] Start pre-stable parity implementation for deferred options
    - [x] implement `wordTimestamps`
@@ -337,8 +338,27 @@ Plan:
   - [x] verify GitHub Actions on the detached repository
   - [x] add `workflow_dispatch` as an explicit CI recovery path on the detached repo
   - [x] defer `v1.2.1` tag until parity
-  - [ ] tag stable `v1.2.1`
+  - [x] tag stable `v1.2.1`
+  - [x] add a post-CI npm publish workflow for merges into `typescript`
   - [ ] publish stable `1.2.1` to npm
+
+## Lot 10 - Post-Merge npm Publishing
+
+Goal: publish the npm package automatically after the default TypeScript branch receives a merge and the release-shaped CI passes.
+
+Plan:
+- [x] Add `.github/workflows/npm-publish.yml`
+- [x] Trigger publish only after `TypeScript CI` completes successfully
+- [x] Restrict automatic publishing to push CI runs on the `typescript` branch
+- [x] Keep `workflow_dispatch` as an explicit recovery path on `typescript`
+- [x] Make publishing idempotent by skipping if `package.json`'s npm version already exists
+- [x] Publish with npm provenance enabled
+- [x] Ensure the matching `v<package.version>` tag exists after a new publish
+- [ ] Configure repository secret `NPM_TOKEN` before the first npm publish
+- [ ] Verify the first automatic publish run for `faster-whisper-ts@1.2.1`
+
+Branch-protection note:
+- [ ] Require `TypeScript CI` on pull requests into `typescript` in GitHub branch protection/rulesets so merges cannot bypass the same gate that precedes publishing.
 
 ## Lot 9 - Pre-Stable Parity Implementation
 
@@ -392,6 +412,7 @@ Pre-stable implementation and validation plan:
 - [x] `python-origin` preserves the last Python baseline
 - [x] `typescript` becomes the default branch after fork detach
 - [x] Parity is implemented and the mini-matrix passes before any stable `v1.2.1` tag
-- [ ] Stable `v1.2.1` is tagged and published
+- [x] Stable `v1.2.1` is tagged
+- [ ] Stable `1.2.1` is published to npm
 - [x] Deferred transcription options are implemented or remain explicitly documented as limitations
 - [x] `git status --short` is clean at the end of the cut-over
