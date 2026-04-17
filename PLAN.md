@@ -354,6 +354,7 @@ Plan:
 - [x] Make publishing idempotent by skipping if `package.json`'s npm version already exists
 - [x] Publish through npm Trusted Publishing / GitHub OIDC, without `NPM_TOKEN`
 - [x] Keep npm provenance enabled through Trusted Publishing
+- [x] Force the publish step to ignore any inherited `NODE_AUTH_TOKEN` and use a token-free npm config
 - [x] Ensure the matching `v<package.version>` tag exists after a new publish
 - [ ] Configure npmjs.com Trusted Publisher for package `faster-whisper-ts`
   - npm package: `faster-whisper-ts`
@@ -362,7 +363,8 @@ Plan:
   - repository: `faster-whisper`
   - workflow filename: `npm-publish.yml`
   - environment: leave empty unless a GitHub deployment environment is added
-- [ ] Verify the first automatic publish run for `faster-whisper-ts@1.2.1`
+- [x] Verify repository-side OIDC on automatic publish run `24587992393`
+- [ ] Verify the first successful npm publish run for `faster-whisper-ts@1.2.1`
 
 Branch-protection note:
 - [ ] Require `TypeScript CI` on pull requests into `typescript` in GitHub branch protection/rulesets so merges cannot bypass the same gate that precedes publishing.
