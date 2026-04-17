@@ -352,9 +352,16 @@ Plan:
 - [x] Restrict automatic publishing to push CI runs on the `typescript` branch
 - [x] Keep `workflow_dispatch` as an explicit recovery path on `typescript`
 - [x] Make publishing idempotent by skipping if `package.json`'s npm version already exists
-- [x] Publish with npm provenance enabled
+- [x] Publish through npm Trusted Publishing / GitHub OIDC, without `NPM_TOKEN`
+- [x] Keep npm provenance enabled through Trusted Publishing
 - [x] Ensure the matching `v<package.version>` tag exists after a new publish
-- [ ] Configure repository secret `NPM_TOKEN` before the first npm publish
+- [ ] Configure npmjs.com Trusted Publisher for package `faster-whisper-ts`
+  - npm package: `faster-whisper-ts`
+  - publisher: GitHub Actions
+  - organization/user: `rhanka`
+  - repository: `faster-whisper`
+  - workflow filename: `npm-publish.yml`
+  - environment: leave empty unless a GitHub deployment environment is added
 - [ ] Verify the first automatic publish run for `faster-whisper-ts@1.2.1`
 
 Branch-protection note:

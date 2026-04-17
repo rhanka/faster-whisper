@@ -32,8 +32,6 @@ jobs:
         )
       }}
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
       - name: Checkout tested commit
@@ -97,32 +95,30 @@ jobs:
         if: steps.npm.outputs.exists == 'true'
         run: echo "Nothing to publish."
 
-      - name: Check npm publish token
-        id: auth
+      - name: Verify GitHub OIDC is available
         if: steps.npm.outputs.exists == 'false'
         run: |
-          if [ -z "${NODE_AUTH_TOKEN}" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::NPM_TOKEN is not configured; skipping npm publish. Configure the repository secret and rerun this workflow from the typescript branch."
-            exit 0
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ]; then
+            echo "::error::GitHub OIDC is not available. The workflow must keep permissions.id-token=write for npm Trusted Publishing."
+            exit 1
           fi
 
-          echo "configured=true" >> "$GITHUB_OUTPUT"
+          echo "GitHub OIDC is available for npm Trusted Publishing."
 
       - name: Install dependencies
-        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
+        if: steps.npm.outputs.exists == 'false'
         run: npm ci
 
       - name: Install ffmpeg
-        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
+        if: steps.npm.outputs.exists == 'false'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Publish to npm
-        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
-        run: npm publish --provenance --access public
+        if: steps.npm.outputs.exists == 'false'
+        run: npm publish --access public
 
       - name: Ensure release tag exists
-        if: steps.npm.outputs.exists == 'false' && steps.auth.outputs.configured == 'true'
+        if: steps.npm.outputs.exists == 'false'
         env:
           RELEASE_TAG: ${{ steps.package.outputs.tag }}
         run: |
