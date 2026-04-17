@@ -45,6 +45,40 @@ const whisper_generate = lib.func('whisper_generate', koffi.pointer(WhisperResul
     koffi.pointer(WhisperOptions)
 ]);
 const whisper_free_result = lib.func('whisper_free_result', 'void', [koffi.pointer(WhisperResult)]);
+const whisper_detect_language_json = lib.func('whisper_detect_language_json', 'str', [
+    WhisperModelHandle,
+    koffi.pointer('float'),
+    'size_t',
+    'size_t',
+    'size_t'
+]);
+const whisper_align_json = lib.func('whisper_align_json', 'str', [
+    WhisperModelHandle,
+    koffi.pointer('float'),
+    'size_t',
+    'size_t',
+    'size_t',
+    koffi.pointer('int'),
+    'size_t',
+    koffi.pointer('int'),
+    koffi.pointer('size_t'),
+    'size_t',
+    koffi.pointer('size_t'),
+    'size_t'
+]);
+
+export interface WhisperAlignment {
+    alignments: Array<[number, number]>;
+    textTokenProbs: number[];
+}
+
+function decodeJsonString<T>(json: string | null, context: string): T {
+    if (!json) {
+        throw new Error(`${context} returned null`);
+    }
+
+    return JSON.parse(json) as T;
+}
 
 export class WhisperModel {
     private handle: any;
@@ -149,6 +183,74 @@ export class WhisperModel {
         whisper_free_result(resultPtr);
 
         return results;
+    }
+
+    public detectLanguage(
+        features: Float32Array,
+        batchSize: number,
+        nMels: number,
+        chunkLength: number
+    ): Array<Array<[string, number]>> {
+        const json = whisper_detect_language_json(
+            this.handle,
+            features,
+            batchSize,
+            nMels,
+            chunkLength
+        );
+
+        return decodeJsonString<Array<Array<[string, number]>>>(json, 'whisper_detect_language_json');
+    }
+
+    public align(
+        features: Float32Array,
+        batchSize: number,
+        nMels: number,
+        chunkLength: number,
+        startSequence: number[],
+        textTokens: number[][],
+        numFrames: number[],
+        medianFilterWidth: number = 7
+    ): WhisperAlignment[] {
+        const startSequenceData = new Int32Array(startSequence);
+        const totalTextTokens = textTokens.reduce((sum, tokens) => sum + tokens.length, 0);
+        const textTokensFlat = new Int32Array(totalTextTokens);
+        const textTokenLengths = new BigUint64Array(textTokens.length);
+        const numFramesData = new BigUint64Array(numFrames.length);
+
+        let offset = 0;
+        for (let i = 0; i < textTokens.length; i++) {
+            const tokens = textTokens[i]!;
+            textTokenLengths[i] = BigInt(tokens.length);
+            numFramesData[i] = BigInt(numFrames[i] ?? chunkLength);
+            textTokensFlat.set(tokens, offset);
+            offset += tokens.length;
+        }
+
+        const json = whisper_align_json(
+            this.handle,
+            features,
+            batchSize,
+            nMels,
+            chunkLength,
+            startSequenceData,
+            startSequenceData.length,
+            textTokensFlat,
+            textTokenLengths,
+            textTokens.length,
+            numFramesData,
+            medianFilterWidth
+        );
+
+        const decoded = decodeJsonString<Array<{ alignments: Array<[number, number]>, text_token_probs: number[] }>>(
+            json,
+            'whisper_align_json'
+        );
+
+        return decoded.map((item) => ({
+            alignments: item.alignments,
+            textTokenProbs: item.text_token_probs,
+        }));
     }
 
     public free(): void {

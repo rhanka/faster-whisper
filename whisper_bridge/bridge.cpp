@@ -4,7 +4,36 @@
 #include <vector>
 #include <cmath>
 #include <complex>
+#include <string>
+#include <nlohmann/json.hpp>
 #include "pocketfft_hdronly.h"
+
+namespace {
+
+ctranslate2::StorageView make_features_storage(
+    const float* features_data,
+    size_t batch_size,
+    size_t n_mels,
+    size_t chunk_length
+) {
+    std::vector<ctranslate2::dim_t> shape = {
+        static_cast<ctranslate2::dim_t>(batch_size),
+        static_cast<ctranslate2::dim_t>(n_mels),
+        static_cast<ctranslate2::dim_t>(chunk_length)
+    };
+
+    ctranslate2::StorageView features(shape, ctranslate2::DataType::FLOAT32);
+    std::copy(features_data, features_data + (batch_size * n_mels * chunk_length), features.data<float>());
+    return features;
+}
+
+char* copy_json_string(const nlohmann::json& json) {
+    static thread_local std::string serialized;
+    serialized = json.dump();
+    return serialized.data();
+}
+
+}
 
 extern "C" {
 
@@ -60,15 +89,7 @@ WhisperResult* whisper_generate(
     try {
         auto* model = static_cast<ctranslate2::models::Whisper*>(handle);
 
-        // Prepare features
-        std::vector<ctranslate2::dim_t> shape = {
-            static_cast<ctranslate2::dim_t>(batch_size),
-            static_cast<ctranslate2::dim_t>(n_mels),
-            static_cast<ctranslate2::dim_t>(chunk_length)
-        };
-        
-        ctranslate2::StorageView features(shape, ctranslate2::DataType::FLOAT32);
-        std::copy(features_data, features_data + (batch_size * n_mels * chunk_length), features.data<float>());
+        ctranslate2::StorageView features = make_features_storage(features_data, batch_size, n_mels, chunk_length);
 
         // Prepare prompts
         std::vector<std::vector<size_t>> int_prompts(batch_size);
@@ -147,6 +168,109 @@ void whisper_free_result(WhisperResult* result) {
         delete[] result->scores;
         delete result;
     }
+}
+
+char* whisper_detect_language_json(
+    WhisperModelHandle handle,
+    const float* features_data,
+    size_t batch_size,
+    size_t n_mels,
+    size_t chunk_length
+) {
+    try {
+        auto* model = static_cast<ctranslate2::models::Whisper*>(handle);
+        ctranslate2::StorageView features = make_features_storage(features_data, batch_size, n_mels, chunk_length);
+        auto encoder_output = model->encode(features, false).get();
+        auto futures = model->detect_language(encoder_output);
+
+        nlohmann::json payload = nlohmann::json::array();
+        for (auto& future : futures) {
+            nlohmann::json batch_result = nlohmann::json::array();
+            for (const auto& item : future.get()) {
+                batch_result.push_back({item.first, item.second});
+            }
+            payload.push_back(batch_result);
+        }
+
+        return copy_json_string(payload);
+    } catch (const std::exception& e) {
+        std::cerr << "Error in whisper_detect_language_json: " << e.what() << std::endl;
+        return nullptr;
+    }
+}
+
+char* whisper_align_json(
+    WhisperModelHandle handle,
+    const float* features_data,
+    size_t batch_size,
+    size_t n_mels,
+    size_t chunk_length,
+    const int* start_sequence,
+    size_t start_sequence_length,
+    const int* text_tokens_flat,
+    const size_t* text_token_lengths,
+    size_t text_count,
+    const size_t* num_frames,
+    size_t median_filter_width
+) {
+    try {
+        auto* model = static_cast<ctranslate2::models::Whisper*>(handle);
+        ctranslate2::StorageView features = make_features_storage(features_data, batch_size, n_mels, chunk_length);
+        auto encoder_output = model->encode(features, false).get();
+
+        std::vector<size_t> start_sequence_ids;
+        start_sequence_ids.reserve(start_sequence_length);
+        for (size_t i = 0; i < start_sequence_length; ++i) {
+            start_sequence_ids.push_back(static_cast<size_t>(start_sequence[i]));
+        }
+
+        std::vector<std::vector<size_t>> text_tokens;
+        text_tokens.reserve(text_count);
+        size_t token_offset = 0;
+        for (size_t i = 0; i < text_count; ++i) {
+            std::vector<size_t> tokens;
+            tokens.reserve(text_token_lengths[i]);
+            for (size_t j = 0; j < text_token_lengths[i]; ++j) {
+                tokens.push_back(static_cast<size_t>(text_tokens_flat[token_offset++]));
+            }
+            text_tokens.push_back(std::move(tokens));
+        }
+
+        std::vector<size_t> frame_counts;
+        frame_counts.reserve(text_count);
+        for (size_t i = 0; i < text_count; ++i) {
+            frame_counts.push_back(num_frames[i]);
+        }
+
+        auto futures = model->align(
+            encoder_output,
+            start_sequence_ids,
+            text_tokens,
+            frame_counts,
+            static_cast<ctranslate2::dim_t>(median_filter_width)
+        );
+
+        nlohmann::json payload = nlohmann::json::array();
+        for (auto& future : futures) {
+            const auto result = future.get();
+            nlohmann::json item;
+            item["alignments"] = nlohmann::json::array();
+            for (const auto& pair : result.alignments) {
+                item["alignments"].push_back({pair.first, pair.second});
+            }
+            item["text_token_probs"] = result.text_token_probs;
+            payload.push_back(item);
+        }
+
+        return copy_json_string(payload);
+    } catch (const std::exception& e) {
+        std::cerr << "Error in whisper_align_json: " << e.what() << std::endl;
+        return nullptr;
+    }
+}
+
+void whisper_free_string(char* value) {
+    (void)value;
 }
 
 void compute_mel_spectrogram(

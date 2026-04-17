@@ -52,8 +52,30 @@ WhisperResult* whisper_generate(
 
 void whisper_free_result(WhisperResult* result);
 
-// detect_language implementation to add later
-// WhisperResult* whisper_detect_language(...);
+char* whisper_detect_language_json(
+    WhisperModelHandle handle,
+    const float* features_data,
+    size_t batch_size,
+    size_t n_mels,
+    size_t chunk_length
+);
+
+char* whisper_align_json(
+    WhisperModelHandle handle,
+    const float* features_data,
+    size_t batch_size,
+    size_t n_mels,
+    size_t chunk_length,
+    const int* start_sequence,
+    size_t start_sequence_length,
+    const int* text_tokens_flat,
+    const size_t* text_token_lengths,
+    size_t text_count,
+    const size_t* num_frames,
+    size_t median_filter_width
+);
+
+void whisper_free_string(char* value);
 
 // Mel Spectrogram computation in C++
 void compute_mel_spectrogram(
