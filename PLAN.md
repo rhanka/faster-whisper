@@ -356,14 +356,14 @@ Plan:
 - [x] Keep npm provenance enabled through Trusted Publishing
 - [x] Force the publish step to ignore any inherited `NODE_AUTH_TOKEN` and use a token-free npm config
 - [x] Ensure the matching `v<package.version>` tag exists after a new publish
-- [ ] Configure npmjs.com Trusted Publisher for package `faster-whisper-ts`
+- [x] Configure npmjs.com Trusted Publisher for package `faster-whisper-ts`
   - npm package: `faster-whisper-ts`
   - publisher: GitHub Actions
   - organization/user: `rhanka`
   - repository: `faster-whisper`
   - workflow filename: `npm-publish.yml`
   - environment: leave empty unless a GitHub deployment environment is added
-  - current blocker: npm requires a fresh 2FA/OTP confirmation; CLI web polling did not complete after two validated URLs
+  - current result: `npm trust list faster-whisper-ts --json` returns trusted publisher id `fc524881-5001-4906-8975-eebda75fad95`
 - [x] Verify repository-side OIDC on automatic publish run `24587992393`
 - [x] Verify first npm publish for `faster-whisper-ts@1.2.1`
   - current result: one-time bootstrap publish succeeded locally as npm user `rhk`
